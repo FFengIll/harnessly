@@ -1,12 +1,19 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { symbolKindToCompletionKind } from './symbolKindMapper';
+import { SymbolCache } from './symbolCache';
 
 /**
  * Provide symbol completion using VSCode's symbol provider
  */
 export class SymbolCompletion {
   private readonly MAX_SYMBOLS = 100;
+  private symbolCache: SymbolCache;
+  private preloadInProgress: Set<string> = new Set();
+
+  constructor(symbolCache: SymbolCache) {
+    this.symbolCache = symbolCache;
+  }
 
   async provide(
     document: vscode.TextDocument,
@@ -36,17 +43,62 @@ export class SymbolCompletion {
       return [];
     }
 
-    // Use VSCode's symbol provider
-    const symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-      'vscode.executeDocumentSymbolProvider',
-      targetUri
-    );
+    // Try to get from cache first
+    let symbols = this.symbolCache.get(targetUri.toString());
+
+    if (!symbols) {
+      // Not cached, fetch from LSP
+      symbols = await this.fetchSymbols(targetUri, token);
+      if (symbols && symbols.length > 0 && !token.isCancellationRequested) {
+        this.symbolCache.set(targetUri.toString(), symbols);
+      }
+    }
 
     if (!symbols || symbols.length === 0) {
       return [];
     }
 
     return this.createCompletionItems(symbols, document, position);
+  }
+
+  /**
+   * Preload symbols for a file (called during file scanning)
+   */
+  async preload(uri: vscode.Uri, token: vscode.CancellationToken): Promise<void> {
+    const uriStr = uri.toString();
+
+    // Skip if already cached or already preloading
+    if (this.symbolCache.get(uriStr) || this.preloadInProgress.has(uriStr)) {
+      return;
+    }
+
+    this.preloadInProgress.add(uriStr);
+
+    try {
+      const symbols = await this.fetchSymbols(uri, token);
+      if (symbols && symbols.length > 0 && !token.isCancellationRequested) {
+        this.symbolCache.set(uriStr, symbols);
+      }
+    } finally {
+      this.preloadInProgress.delete(uriStr);
+    }
+  }
+
+  /**
+   * Fetch symbols from LSP
+   */
+  private async fetchSymbols(
+    uri: vscode.Uri,
+    token: vscode.CancellationToken
+  ): Promise<vscode.DocumentSymbol[] | undefined> {
+    try {
+      return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+        'vscode.executeDocumentSymbolProvider',
+        uri
+      );
+    } catch {
+      return undefined;
+    }
   }
 
   private resolveFileUri(filePath: string, workspaceUri: vscode.Uri): vscode.Uri | undefined {

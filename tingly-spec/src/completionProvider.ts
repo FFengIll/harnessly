@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { FileCache } from './fileCache';
 import { FileCompletion } from './fileCompletion';
 import { SymbolCompletion } from './symbolCompletion';
+import { SymbolCache } from './symbolCache';
 
 /**
  * Vibely Completion Provider
@@ -12,11 +13,52 @@ import { SymbolCompletion } from './symbolCompletion';
 export class VibelyCompletionProvider implements vscode.CompletionItemProvider {
   private fileCompletion: FileCompletion;
   private symbolCompletion: SymbolCompletion;
+  private symbolCache: SymbolCache;
 
   constructor() {
     const fileCache = new FileCache();
     this.fileCompletion = new FileCompletion(fileCache);
-    this.symbolCompletion = new SymbolCompletion();
+    this.symbolCache = new SymbolCache();
+    this.symbolCompletion = new SymbolCompletion(this.symbolCache);
+
+    // Trigger background preload when workspace is ready
+    this.schedulePreload();
+  }
+
+  /**
+   * Schedule preload for both files and symbols
+   */
+  private schedulePreload(): void {
+    // Small delay to let workspace and LSP extensions initialize
+    setTimeout(() => {
+      this.preloadWorkspace();
+    }, 1000);
+  }
+
+  /**
+   * Preload workspace files and symbols to improve first-use experience
+   */
+  private async preloadWorkspace(): Promise<void> {
+    const token = new vscode.CancellationTokenSource().token;
+
+    // 1. Preload file list (this triggers workspace scan)
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (workspaceFolder) {
+      vscode.workspace.findFiles('**/*', '**/node_modules/**', 1000).then(() => {
+        // File list is now cached in FileCache
+      });
+    }
+
+    // 2. Preload symbols for recently opened files (warming up LSP)
+    const uris = vscode.workspace.textDocuments.map(doc => doc.uri);
+    const toPreload = uris.slice(0, 10);
+
+    for (const uri of toPreload) {
+      if (token.isCancellationRequested) {
+        break;
+      }
+      await this.symbolCompletion.preload(uri, token);
+    }
   }
 
   /**
@@ -52,5 +94,9 @@ export class VibelyCompletionProvider implements vscode.CompletionItemProvider {
     }
 
     return undefined;
+  }
+
+  dispose(): void {
+    this.symbolCache.dispose();
   }
 }
