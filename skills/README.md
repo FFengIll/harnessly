@@ -353,6 +353,7 @@ docs/
 
 | Skill | Description |
 |-------|-------------|
+| `/discuss` | Interactive technical discussion |
 | `/doc` | Documentation generation and management |
 | `/pencil` | Wireframe and UI/UX design |
 | `/cache` | Multi-level architecture knowledge caching with TTL |

@@ -6,6 +6,7 @@ This directory contains the foundational skills that support the SDLC workflow. 
 
 | Skill | Purpose | Documentation |
 |-------|---------|---------------|
+| **discuss** | Interactive technical discussion | [discuss.md](./discuss.md) |
 | **doc** | Documentation generation and management | [doc.md](./doc.md) |
 | **pencil** | Wireframe and UI/UX design | [pencil.md](./pencil.md) |
 | **cache** | Architecture knowledge caching | [cache.md](./cache.md) |
@@ -16,6 +17,7 @@ This directory contains the foundational skills that support the SDLC workflow. 
 Foundation skills are available as standalone commands:
 
 ```bash
+/discuss [topic description]
 /doc [type] [target]
 /pencil [design description]
 /cache [scope] [action]
@@ -31,6 +33,8 @@ These foundation skills are designed to work seamlessly with the SDLC workflow:
 - **During coding**: Use `/git` for branch management and commits
 - **During any phase**: Use `/doc` to update documentation
 
+**Note**: `/discuss` can be used independently anytime for technical discussions, exploration, and decision-making - it's not tied to any specific phase.
+
 ## Design Reference
 
 These skills were created based on the SDLC v3.2 design document:
@@ -41,6 +45,7 @@ These skills were created based on the SDLC v3.2 design document:
 ```
 skills/foundation/
 ├── README.md           # This file
+├── discuss.md          # Technical discussion skill
 ├── doc.md              # Documentation skill
 ├── pencil.md           # Wireframe design skill
 ├── cache.md            # Architecture caching skill
@@ -50,6 +55,7 @@ skills/foundation/
 ## Dependencies
 
 Foundation skills may depend on each other:
+- **discuss** depends on: cache, doc, git
 - **doc** depends on: cache, pencil
 - **pencil** depends on: doc, cache
 - **cache** depends on: doc, git
