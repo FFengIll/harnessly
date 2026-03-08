@@ -1,6 +1,6 @@
 # Cache Skill
 
-The `/cache` skill manages SDLC workflow state and cached data, including architecture knowledge and workflow metadata.
+The `/cache` skill manages SDLC workflow state and cached architecture documentation.
 
 ## Usage
 
@@ -14,409 +14,267 @@ The `/cache` skill manages SDLC workflow state and cached data, including archit
 - `clear` - Remove cached value by key (or clear all if no key)
 - `list` - List all cached keys and metadata
 - `invalidate` - Mark cache entry as stale
+- `refresh` - Update cache with fresh data
 
-**Keys:**
-- `workflow.state` - Current SDLC phase and status
-- `workflow.phase` - Active phase name
-- `architecture` - Project architecture cache
-- `branch` - Current working branch
-- `config` - SDLC configuration settings
-- Custom keys for project-specific data
+## Architecture Cache
 
-**Values:**
-- Simple values: strings, numbers, booleans
-- Complex values: JSON objects for structured data
+### Overview
 
-**Examples:**
-- `/cache set workflow.phase implementation` - Set current phase
-- `/cache get workflow.state` - Get current workflow state
-- `/cache list` - List all cached entries
-- `/cache clear workflow.state` - Clear workflow state
-- `/cache set config '{"timeout": 300, "retries": 3}'` - Store JSON config
-
-## Guidelines
-
-### When to Use
-- **Workflow State Management**: Track current SDLC phase and progress
-- **Architecture Caching**: Store and reuse project architecture understanding
-- **Session Context**: Maintain context across multiple sessions
-- **Configuration Storage**: Store SDLC configuration and settings
-- **Progress Tracking**: Cache progress for long-running workflows
-- **Data Persistence**: Store computed data for reuse
-
-### Cache Storage
-
-Cache data is stored in: `./.sdlc/cache/`
-
-File structure:
-```
-.sdlc/
-├── cache/
-│   ├── workflow-state.json      # Current workflow state
-│   ├── architecture.json        # Cached architecture data
-│   ├── config.json              # SDLC configuration
-│   └── [custom-keys].json       # Project-specific cache
-└── meta/
-    └── cache-metadata.json      # Cache metadata and timestamps
-```
-
-### JSON Storage Format
-
-For complex data, use JSON format:
-
-```json
-{
-  "key": "workflow.state",
-  "value": {
-    "phase": "implementation",
-    "status": "in_progress",
-    "startedAt": "2026-03-08T10:00:00Z",
-    "completedSteps": ["planning", "design"],
-    "currentStep": "implementation",
-    "metadata": {
-      "feature": "user-auth",
-      "branch": "feature/user-auth"
-    }
-  },
-  "createdAt": "2026-03-08T10:00:00Z",
-  "updatedAt": "2026-03-08T10:30:00Z",
-  "ttl": 86400
-}
-```
-
-### Cache Metadata
-
-Track cache freshness with metadata:
-
-```json
-{
-  "entries": {
-    "workflow.state": {
-      "created": "2026-03-08T10:00:00Z",
-      "updated": "2026-03-08T10:30:00Z",
-      "accessed": "2026-03-08T11:00:00Z",
-      "size": 1024,
-      "stale": false
-    }
-  },
-  "version": "1.0"
-}
-```
+Architecture documentation is cached in `docs/arch/` to avoid repeated code analysis during SDLC workflows. See [ARCH_CACHE_SYSTEM.md](../../docs/arch/ARCH_CACHE_SYSTEM.md) for full documentation.
 
 ### Cache Structure
 
+```
+docs/arch/
+├── overview-arch.md              # Project-level (7d TTL)
+├── [module]-arch.md              # Module-level (3d TTL)
+├── [module]/[sub]-arch.md        # Component-level (1d TTL)
+└── cache-metadata.json           # Cache metadata
+```
+
+### Reading Architecture Cache
+
+**Priority Order (most specific first):**
+
+1. **Component**: `docs/arch/[module]/[sub]-arch.md` (12h TTL)
+2. **Module**: `docs/arch/[module]-arch.md` (3d TTL)
+3. **Project**: `docs/arch/overview-arch.md` (7d TTL)
+
+**Examples:**
+
+```bash
+# For auth module work
+docs/arch/auth/login/oauth-arch.md  # Most specific
+docs/arch/auth/login-arch.md
+docs/arch/auth-arch.md
+docs/arch/overview-arch.md         # Fallback
+
+# Use glob to find relevant cache
+docs/arch/**/*-arch.md
+docs/arch/auth-arch.md
+docs/arch/auth/**/*-arch.md
+```
+
+### Cache Levels
+
+| Level | Pattern | TTL | Example | Use Case |
+|-------|---------|-----|---------|----------|
+| **Project** | `overview-arch.md` | 7 days | `docs/arch/overview-arch.md` | Whole project context |
+| **Module** | `[module]-arch.md` | 3 days | `docs/arch/auth-arch.md` | Feature work on module |
+| **Component** | `[module]/[sub]-arch.md` | 1 day | `docs/arch/auth/login-arch.md` | Deep dive into component |
+| **Detailed** | `[module]/[sub]/[detail]-arch.md` | 12h | `docs/arch/auth/providers/oauth-arch.md` | Detailed analysis |
+
+### Cache File Format
+
+Each cache file includes:
+
 ```markdown
-# [Project/Module Name] Architecture
+# [Scope] Architecture
 
-**Last Updated**: [YYYY-MM-DD]
-**Version**: [semantic version if applicable]
-
----
+**Last Updated**: YYYY-MM-DD
+**Cache Level**: [Project|Module|Component|Detailed]
+**Expires**: YYYY-MM-DD
+**Hash**: [git commit hash]
 
 ## Overview
+[High-level description]
 
-[Brief description of the project/module - what it does, who uses it, key goals]
+## Components
+[Component breakdown]
 
----
-
-## Technology Stack
-
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| Frontend | [React/Vue/etc] | [version] | [purpose] |
-| Backend | [Go/Node/etc] | [version] | [purpose] |
-| Database | [PostgreSQL/MongoDB/etc] | [version] | [purpose] |
-| Cache | [Redis/etc] | [version] | [purpose] |
-| Message Queue | [RabbitMQ/Kafka/etc] | [version] | [purpose] |
-
----
-
-## Architecture Diagram(s)
-
-[Include ASCII diagrams or describe key architectural patterns]
-
----
-
-## Directory Structure
-
-```
-project-root/
-├── src/
-│   ├── frontend/          # Frontend application code
-│   ├── backend/           # Backend application code
-│   └── shared/            # Shared utilities/types
-├── docs/
-│   ├── spec/             # Specification documents
-│   └── arch/             # Architecture documents
-└── tests/
-    ├── unit/             # Unit tests
-    ├── integration/      # Integration tests
-    └── e2e/              # End-to-end tests
-```
-
----
-
-## Key Components
-
-### Frontend Components
-
-| Component | File | Purpose | Key Props/State |
-|-----------|------|---------|-----------------|
-| [ComponentName] | [path] | [purpose] | [key props/state] |
-
-### Backend Services/Modules
-
-| Service/Module | File | Purpose | Key Methods/Endpoints |
-|----------------|------|---------|----------------------|
-| [ServiceName] | [path] | [purpose] | [key methods/endpoints] |
-
----
+## Dependencies
+[What this depends on]
 
 ## Data Models
-
-### [Model Name]
-```typescript
-// or Go struct, SQL schema, etc.
-type [ModelName] struct {
-    ID          string    `json:"id"`
-    [Field1]    [Type]    `json:"[field1]"`
-    [Field2]    [Type]    `json:"[field2]"`
-}
-```
-**Purpose**: [what this model represents]
-**Key Relationships**: [related models]
-
----
-
-## API Endpoints
-
-### [Resource Name]
-
-| Method | Endpoint | Description | Request | Response |
-|--------|----------|-------------|---------|----------|
-| GET | `/api/v1/resource` | List items | - | `Item[]` |
-| POST | `/api/v1/resource` | Create item | `CreateItemRequest` | `Item` |
-
----
-
-## State Management
-
-### Frontend State
-- **Global State**: [what's managed globally]
-- **Local State**: [what's managed locally]
-- **Server State**: [how data is fetched/cached]
-
-### Backend State
-- **Session Management**: [how sessions are handled]
-- **Caching Strategy**: [what's cached and where]
-- **Database Connection**: [pooling, transactions]
-
----
-
-## Key Patterns & Conventions
-
-### Architectural Patterns
-- [Pattern 1]: [description and where it's used]
-
-### Code Conventions
-- **Naming**: [naming conventions]
-- **Error Handling**: [how errors are handled]
-- **Logging**: [logging strategy]
-- **Testing**: [testing patterns]
-
----
+[Relevant data structures]
 
 ## Integration Points
-
-### External Services
-| Service | Purpose | Integration Method | Fallback Strategy |
-|---------|---------|-------------------|-------------------|
-| [Service 1] | [purpose] | [REST/GraphQL/SDK] | [fallback] |
-
-### Internal APIs
-| API | Consumer | Data Flow |
-|-----|----------|-----------|
-| [API Name] | [who consumes it] | [data flow description] |
-
----
-
-## Security Considerations
-
-- **Authentication**: [method - JWT, session, OAuth, etc.]
-- **Authorization**: [RBAC, ABAC, middleware]
-- **Data Protection**: [encryption at rest/transit]
-- **Input Validation**: [validation strategy]
-- **Rate Limiting**: [how rate limiting is implemented]
-
----
-
-## Performance Considerations
-
-- **Database Optimization**: [indexes, query optimization]
-- **Caching Strategy**: [what's cached, TTL, invalidation]
-- **Frontend Optimization**: [code splitting, lazy loading]
-- **Monitoring**: [what's monitored - APM, metrics, logs]
-
----
-
-## Known Technical Debt
-
-| Issue | Impact | Proposed Solution | Priority |
-|-------|--------|-------------------|----------|
-| [debt 1] | [impact] | [solution] | [High/Medium/Low] |
-
----
-
-## References
-
-- **Related Specs**: [links to relevant spec docs]
-- **External Documentation**: [links to external docs]
-- **Design Decisions**: [links to ADRs or design discussions]
+[How it connects to other parts]
 ```
 
-## Process
+### Writing Architecture Cache
 
-### Get Operation (`/cache get [key]`)
+When generating cache:
 
-1. Check if cache directory exists
-2. Look up key in cache files
-3. Parse JSON if complex value
-4. Return value with metadata (age, size)
-5. Warn if cache is stale
+1. **Determine appropriate level** based on scope
+2. **Generate architecture documentation**
+3. **Save with naming convention**: `[YYYYMMDD]-[scope]-arch.md`
+4. **Update metadata** in `cache-metadata.json`
+5. **Include hash** for change detection
 
-**Error Handling:**
-- Key not found: Return null or default value
-- Invalid JSON: Return raw value with warning
-- Cache directory missing: Create and return null
+### Cache Freshness
 
-### Set Operation (`/cache set [key] [value]`)
+Check if cache is valid:
 
-1. Ensure cache directory exists
-2. Parse value as JSON if possible
-3. Create or update cache file
-4. Update metadata (timestamp, size)
-5. Return success confirmation
+```bash
+# Compare last updated date with TTL
+if [ $(($(date +%s) - cache_timestamp)) -gt $((ttl_seconds)) ]; then
+    echo "Cache expired, regenerate"
+fi
 
-**Error Handling:**
-- Invalid JSON: Store as string value
-- Write permission error: Report and suggest fix
-- Disk space: Check before write
-
-### Clear Operation (`/cache clear [key?]`)
-
-1. If key provided: delete specific cache file
-2. If no key: confirm then clear all cache
-3. Update metadata to reflect changes
-4. Return summary of cleared items
-
-**Error Handling:**
-- Key not found: Inform and continue
-- File lock: Retry or report
-- Partial failure: Report what was cleared
-
-### List Operation (`/cache list`)
-
-1. Read all cache files
-2. Extract metadata for each entry
-3. Display in formatted table
-4. Show key, size, age, staleness status
-
-**Output Format:**
-```
-Cache Entries:
-┌─────────────────┬──────────┬──────────┬────────┐
-│ Key             │ Size     │ Age      │ Stale  │
-├─────────────────┼──────────┼──────────┼────────┤
-│ workflow.state  │ 1.2 KB   │ 2m ago   │ No     │
-│ architecture    │ 45.6 KB  │ 1h ago   │ No     │
-│ config          │ 0.8 KB   │ 1d ago   │ Yes    │
-└─────────────────┴──────────┴──────────┴────────┘
+# Or compare git hash
+cached_hash=$(grep "Hash:" docs/arch/module-arch.md)
+current_hash=$(git rev-parse HEAD)
+if [ "$cached_hash" != "$current_hash" ]; then
+    echo "Code changed, invalidate cache"
+fi
 ```
 
-### Invalidate Operation (`/cache invalidate [key]`)
+### Auto-Refresh Rules
 
-1. Mark cache entry as stale in metadata
-2. Optionally delete cache file
-3. Update metadata timestamp
-4. Return confirmation
+| Trigger | Paths Affected | Cache Levels to Invalidate |
+|---------|----------------|---------------------------|
+| Git commit to `src/auth/` | `src/auth/**` | auth-arch.md, auth/**/* |
+| Config file change | `config/**` | overview-arch.md |
+| Package.json change | `package.json` | overview-arch.md |
 
-## Cache Invalidation Strategies
+## Workflow State Cache
 
-### TTL (Time To Live)
-- Set expiration time when storing
-- Auto-invalidate after TTL expires
-- Configurable per key type
+### State Storage
 
-### Manual Invalidation
-- Explicit invalidate command
-- Useful when data becomes stale
-- Prevents using outdated cache
+```
+.sdlc/
+├── state.json            # Current workflow state
+├── history.json          # Phase execution history
+└── config.json           # Configuration (optional)
+```
 
-### Dependency Tracking
-- Track dependencies between cache entries
-- Invalidate dependent entries when parent changes
-- Example: architecture cache invalidates when code changes
-
-## Integration with Other Skills
-
-### Used By
-- **doc**: Cache architecture knowledge for context
-- **git**: Store workflow state and branch info
-- **phases**: Track phase completion status
-- **workflows**: Maintain workflow execution state
-
-### State Management Example
+### State File Example
 
 ```json
 {
-  "key": "workflow.state",
-  "value": {
-    "currentPhase": "implementation",
-    "phases": {
-      "planning": {
-        "status": "completed",
-        "completedAt": "2026-03-08T09:00:00Z"
-      },
-      "design": {
-        "status": "completed",
-        "completedAt": "2026-03-08T10:00:00Z"
-      },
-      "implementation": {
-        "status": "in_progress",
-        "startedAt": "2026-03-08T11:00:00Z",
-        "tasks": ["task1", "task2"]
-      },
-      "testing": {
-        "status": "pending"
-      },
-      "deployment": {
-        "status": "pending"
-      }
-    },
-    "metadata": {
-      "feature": "user-auth",
-      "branch": "feature/user-auth",
-      "assignee": "developer"
-    }
-  }
+  "workflow": "feature",
+  "current_phase": "spec",
+  "completed": ["research"],
+  "branch": "feature/user-auth",
+  "description": "User Authentication System",
+  "started_at": "2026-03-08T10:00:00Z",
+  "updated_at": "2026-03-08T14:30:00Z",
+  "phase_history": [
+    { "phase": "research", "completed_at": "2026-03-08T10:30:00Z" }
+  ]
 }
 ```
+
+## Integration with SDLC Phases
+
+### Spec Phase
+
+1. **Before writing spec**:
+   ```bash
+   # Check for relevant arch cache
+   glob("docs/arch/*-arch.md")
+
+   # Read most specific cache available
+   # Use cached info for design decisions
+   ```
+
+2. **After understanding**:
+   ```bash
+   # Generate or update arch cache
+   # Save to docs/arch/[timestamp]-[scope]-arch.md
+   ```
+
+### Understand Phase
+
+- Automatically generates architecture cache
+- Saves to appropriate level based on scope
+- Updates cache metadata
+
+### Research Phase
+
+- Reads module-level cache for context
+- Focuses research on specific areas
+- Updates cache with findings
+
+## Examples
+
+### Example 1: Feature Development
+
+```bash
+# 1. Check for auth module cache
+cat docs/arch/auth-arch.md
+
+# 2. If fresh (within 3 days), use it
+# 3. If stale or missing, generate new
+/sdlc understand src/auth
+
+# 4. Write spec using cached architecture
+/sdlc spec "Add OAuth login"
+```
+
+### Example 2: Bug Fix
+
+```bash
+# 1. Check for specific component cache
+cat docs/arch/auth/login-arch.md
+
+# 2. Understand flow from cache
+# 3. Debug the issue
+/sdlc debug "Login fails on Safari"
+
+# 4. Update cache if architecture changed
+```
+
+### Example 3: Reading Cache Hierarchy
+
+```bash
+# Most specific first
+if [ -f "docs/arch/auth/login/oauth-arch.md" ]; then
+    cat docs/arch/auth/login/oauth-arch.md
+elif [ -f "docs/arch/auth/login-arch.md" ]; then
+    cat docs/arch/auth/login-arch.md
+elif [ -f "docs/arch/auth-arch.md" ]; then
+    cat docs/arch/auth-arch.md
+else
+    cat docs/arch/overview-arch.md
+fi
+```
+
+## Best Practices
+
+### When to Create Cache
+
+- **Project overview**: First time working on project
+- **Module cache**: Before starting feature work on a module
+- **Component cache**: When diving deep into implementation
+- **Detailed cache**: For complex, critical components
+
+### When to Update Cache
+
+- After significant code changes
+- When architecture patterns change
+- Before starting major refactoring
+- When cache expires (based on TTL)
+
+### When to Skip Cache
+
+- For trivial code changes
+- When working with well-known modules
+- When cache is very recent (< 1 hour old)
+- For quick one-off tasks
+
+## Completion Criteria
+
+- [ ] Architecture cache directory created (`docs/arch/`)
+- [ ] Multi-level cache format defined
+- [ ] TTL-based freshness control working
+- [ ] Hash-based invalidation working
+- [ ] Fallback strategy between cache levels
+- [ ] Metadata tracking implemented
+- [ ] Integration with spec phase working
+- [ ] Integration with understand phase working
+- [ ] Documentation provided
+- [ ] Examples provided
 
 ## Dependencies
 
 - **doc**: Create architecture documentation from cached data
-- **git**: Update branch info in workflow state
-- **phases**: Update phase completion in workflow state
+- **git**: Track commits for hash-based invalidation
+- **understand**: Generate architecture understanding
+- **spec**: Read architecture cache for context
 
-## Completion Criteria
+## References
 
-- [ ] Cache directory structure created
-- [ ] Value stored successfully with key
-- [ ] JSON values properly parsed and formatted
-- [ ] Metadata tracked for all entries
-- [ ] Staleness detection working
-- [ ] Integration with other skills functional
-- [ ] Error handling comprehensive
-- [ ] List operation displays all entries
-- [ ] Clear operation works for single and all entries
-- [ ] TTL support implemented
+- [ARCH_CACHE_SYSTEM.md](../../docs/arch/ARCH_CACHE_SYSTEM.md) - Full cache system documentation
+- [spec.md](../../commands/spec.md) - Integration with spec command

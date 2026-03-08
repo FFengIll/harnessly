@@ -27,30 +27,80 @@ The specification phase skill creates comprehensive technical specification docu
    - Clarify functional and non-functional requirements
    - Identify dependencies and constraints
 
-2. **Structure the Specification**
+2. **Check Architecture Cache**
+   - Look for existing architecture cache in `docs/arch/*-arch.md`
+   - Read most specific cache available (component → module → project)
+   - Use cached architecture info to inform design decisions
+   - Skip redundant code analysis if cache is fresh
+   - Generate new cache if needed for the scope
+
+3. **Structure the Specification**
    - Define the feature/system scope
    - Document user stories or use cases
    - Specify APIs and data structures
    - Define component interactions
    - Include technical considerations
 
-3. **Add Technical Details**
+4. **Add Technical Details**
    - Data models and schemas
    - API endpoints and contracts
    - State management approach
    - Error handling strategy
    - Performance considerations
 
-4. **Document Edge Cases and Considerations**
+5. **Document Edge Cases and Considerations**
    - Error scenarios
    - Validation rules
    - Security considerations
    - Testing approach
 
-5. **Save to Documentation**
+6. **Save to Documentation**
    - Save to docs/spec/ directory
-   - Use descriptive filename
-   - Include date and version
+   - Use descriptive filename with date: `YYYYMMDD-[title]-spec.md`
+   - Include version and status
+
+## Architecture Cache Integration
+
+### Reading Cache
+
+Before writing the spec, check for relevant architecture cache:
+
+```bash
+# Priority order (most specific first)
+docs/arch/[module]/[sub]/[comp]-arch.md  # Component level
+docs/arch/[module]/[sub]-arch.md          # Sub-module level
+docs/arch/[module]-arch.md                # Module level
+docs/arch/overview-arch.md                # Project level
+```
+
+### Cache Freshness (TTL Reference)
+
+| Level | TTL Reference | Use for Spec |
+|-------|---------------|--------------|
+| Project | ~30 days | Cross-module features, system design |
+| Module | ~14 days | Module-specific features |
+| Sub-module | ~7 days | Component features |
+| Component | ~3 days | Detailed implementation specs |
+
+> **Note**: TTL values are reference guidelines only. Actual cache freshness depends on code changes.
+
+### Writing Cache
+
+If the spec requires understanding a new area:
+
+1. Generate appropriate cache level
+2. Save to `docs/arch/[YYYYMMDD]-[scope]-arch.md`
+3. Include hash for change detection
+4. Reference in spec document
+
+### Benefits
+
+- **Reduce code reading**: Use cached architecture info
+- **Faster spec creation**: Skip redundant analysis
+- **Consistent context**: Share architecture understanding across specs
+- **Smart invalidation**: Auto-refresh when code changes
+
+**See also**: `docs/arch/ARCH_CACHE_SYSTEM.md` for full documentation
 
 ## Specification Template
 
@@ -320,6 +370,7 @@ interface Error {
 - [External documentation]
 - [Similar implementations]
 - [Design patterns]
+- [Architecture cache]: `docs/arch/[relevant]-arch.md`
 
 ---
 
@@ -349,8 +400,8 @@ interface Error {
 - [ ] Performance considerations noted
 - [ ] Dependencies identified
 - [ ] Open questions listed
-- [ ] Saved to docs/spec/ directory
-- [ ] Created using doc.md skill
+- [ ] Architecture cache checked/referenced
+- [ ] Saved to docs/spec/ directory with date prefix
 
 ## Examples
 
@@ -407,6 +458,7 @@ The spec phase translates research findings into a concrete implementation plan,
 
 - **doc.md** - Used to create and save the specification document
 - **pencil.md** - Used to create diagrams for the specification
+- **cache.md** - Architecture caching for context
 - **research.md** - Previous phase: provides foundation for specification
 - **coding.md** - Next phase: implements based on this specification
 
@@ -420,3 +472,5 @@ The spec phase translates research findings into a concrete implementation plan,
 - Reference research findings for key decisions
 - Keep specs updated as requirements evolve
 - Use pencil.md to create diagrams for complex interactions
+- **Check architecture cache first** - don't re-analyze well-known code
+- **Update cache if needed** - help future specs work faster

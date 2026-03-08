@@ -14,9 +14,66 @@
   - Write necessary tests for your work following the corresponding programming language conventions.
   - Since backend work can be time-consuming and may be limited by network, handle special test cases carefully.
 
-## Cache
+## Architecture Cache
+
 Since each spec may need to understand the project, cache architecture understanding and reuse it when possible.
-The cache can be placed into ./docs/arch/datetime-arch.md, e.g., ./docs/arch/20260105-arch.md, updating only the timestamp.
+
+### Cache Structure
+
+Architecture caches are stored in `./docs/arch/` with multi-level granularity:
+
+```
+docs/arch/
+├── overview-arch.md              # Project-level (7d TTL)
+├── [module]-arch.md              # Module-level (3d TTL)
+├── [module]/[sub]-arch.md        # Component-level (1d TTL)
+└── cache-metadata.json           # Cache metadata
+```
+
+### Reading Cache
+
+**Priority Order (most specific first):**
+1. Component: `docs/arch/[module]/[sub]-arch.md`
+2. Module: `docs/arch/[module]-arch.md`
+3. Project: `docs/arch/overview-arch.md`
+
+**Example:**
+```bash
+# For auth module work, check in order:
+docs/arch/auth/login/oauth-arch.md  # Most specific
+docs/arch/auth/login-arch.md
+docs/arch/auth-arch.md
+docs/arch/overview-arch.md         # Fallback
+```
+
+### Cache Freshness
+
+Check if cache is still valid (TTL as reference):
+- **Project level**: ~30 days
+- **Module level**: ~14 days
+- **Component level**: ~7 days
+- **Detailed level**: ~3 days
+
+> **Note**: TTL values are reference guidelines only. Actual cache freshness depends on code changes.
+
+If cache is expired or missing, regenerate using `/sdlc understand [scope]`.
+
+### Writing Cache
+
+When analyzing codebase for spec:
+1. Generate appropriate cache level
+2. Save with timestamp: `[YYYYMMDD]-[scope]-arch.md`
+3. Update `cache-metadata.json`
+4. Include hash for change detection
+
+### Benefits
+
+- **Reduce code reading**: Use cached architecture info
+- **Faster spec creation**: Skip redundant analysis
+- **Consistent context**: Share architecture understanding across specs
+- **Smart invalidation**: Auto-refresh when code changes
+
+**See also**: `docs/arch/ARCH_CACHE_SYSTEM.md` for full documentation
 
 ## IMPORTANT
 You can use the `askUserQuestion` tool to communicate with the user, or let the user `choose` for discussion.

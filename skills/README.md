@@ -243,7 +243,16 @@ The system maintains persistent state in `.sdlc/` directory:
 .sdlc/
 ├── state.json            # Current workflow state
 ├── history.json          # Phase execution history
-└── config.json           # Configuration (optional)
+├── config.json           # Configuration (optional)
+├── cache/                # Architecture knowledge cache
+│   ├── workflow-state.json       # Current workflow state
+│   ├── architecture-summary.json # High-level overview (7d TTL)
+│   ├── architecture-brief.json   # Component map (3d TTL)
+│   ├── architecture-detailed.json # Full analysis (1d TTL)
+│   └── architecture-full.json    # Complete analysis (12h TTL)
+└── meta/                 # Cache metadata
+    ├── cache-metadata.json        # Cache timestamps and metadata
+    └── architecture-tracking.json # Track code changes for auto-refresh
 ```
 
 ### State File Example
@@ -346,8 +355,34 @@ docs/
 |-------|-------------|
 | `/doc` | Documentation generation and management |
 | `/pencil` | Wireframe and UI/UX design |
-| `/cache` | Architecture knowledge caching |
+| `/cache` | Multi-level architecture knowledge caching with TTL |
 | `/git` | Git operations assistance |
+
+### Multi-Level Architecture Cache
+
+The `/cache` skill provides intelligent architecture caching at different detail levels:
+
+| Level | Description | TTL | Use Case |
+|-------|-------------|-----|----------|
+| **summary** | Tech stack, main components, directory structure | 7 days | Quick context, onboarding |
+| **brief** | Component map, key modules, patterns, dependencies | 3 days | Feature work, bug fixes |
+| **detailed** | Full component analysis, data models, APIs, patterns | 1 day | Implementation work |
+| **full** | Complete with code patterns, relationships, technical debt | 12 hours | Refactoring, architecture review |
+
+```bash
+# Get architecture cache at different levels
+/cache get architecture --level=brief
+/cache get architecture --level=detailed
+/cache get architecture --level=full
+
+# Refresh cache
+/cache refresh architecture
+
+# List all cache entries with freshness
+/cache list
+```
+
+**Auto-refresh**: Cache automatically invalidates based on code changes detected via git commits.
 
 ## Common Usage Examples
 
