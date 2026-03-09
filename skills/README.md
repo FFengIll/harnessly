@@ -88,7 +88,8 @@ skills/
     ├── doc.md            # Documentation generation
     ├── pencil.md         # Wireframe and UI/UX design
     ├── cache.md          # Architecture knowledge caching
-    └── git.md            # Git operations assistance
+    ├── git.md            # Git operations assistance
+    └── handoff.md        # Subagent delegation with context
 ```
 
 ## Available Workflows
@@ -358,6 +359,7 @@ docs/
 | `/pencil` | Wireframe and UI/UX design |
 | `/cache` | Multi-level architecture knowledge caching with TTL |
 | `/git` | Git operations assistance |
+| `/handoff` | Delegate tasks to subagents with shared SDLC context |
 
 ### Multi-Level Architecture Cache
 

@@ -36,6 +36,7 @@ Software Development Lifecycle management.
 | `/sdlc skip [phase]` | Skip current phase |
 | `/sdlc phase <name>` | Jump to phase |
 | `/sdlc end` | End workflow |
+| `/archive [scope] [pattern]` | Archive old docs |
 
 ### Workflow Types
 
@@ -117,9 +118,10 @@ State stored in `.sdlc/state.json`. Use `/sdlc start` to enable.
 
 ```
 docs/
-├── spec/      # Specs
-├── research/  # Research docs
-└── verify/    # Verification reports
+├── spec/       # Specs
+├── research/   # Research docs
+├── verify/     # Verification reports
+└── archive/ # Archived docs
 
 .sdlc/state.json  # Workflow state
 ```

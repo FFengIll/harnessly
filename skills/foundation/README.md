@@ -10,7 +10,9 @@ This directory contains the foundational skills that support the SDLC workflow. 
 | **doc** | Documentation generation and management | [doc.md](./doc.md) |
 | **pencil** | Wireframe and UI/UX design | [pencil.md](./pencil.md) |
 | **cache** | Architecture knowledge caching | [cache.md](./cache.md) |
+| **archive** | Archive old documentation | [archive.md](./archive.md) |
 | **git** | Git operations assistance | [git.md](./git.md) |
+| **handoff** | Subagent delegation with context | [handoff.md](./handoff.md) |
 
 ## Usage
 
@@ -21,7 +23,9 @@ Foundation skills are available as standalone commands:
 /doc [type] [target]
 /pencil [design description]
 /cache [scope] [action]
+/archive [scope] [pattern]
 /git [action] [options]
+/handoff [task] [options]
 ```
 
 ## Integration with SDLC
@@ -30,10 +34,13 @@ These foundation skills are designed to work seamlessly with the SDLC workflow:
 
 - **During research**: Use `/cache` to read architecture knowledge
 - **During spec**: Use `/pencil` to create wireframes, `/doc` to generate API docs
-- **During coding**: Use `/git` for branch management and commits
+- **During coding**: Use `/git` for branch management and commits, `/handoff` for code analysis
 - **During any phase**: Use `/doc` to update documentation
+- **For delegation**: Use `/handoff` to delegate complex tasks with full context
 
 **Note**: `/discuss` can be used independently anytime for technical discussions, exploration, and decision-making - it's not tied to any specific phase.
+
+**Note**: `/handoff` is useful for delegating time-consuming analysis or exploration to subagents while maintaining SDLC context.
 
 ## Design Reference
 
@@ -49,7 +56,9 @@ skills/foundation/
 ├── doc.md              # Documentation skill
 ├── pencil.md           # Wireframe design skill
 ├── cache.md            # Architecture caching skill
-└── git.md              # Git operations skill
+├── archive.md        # Archive skill
+├── git.md              # Git operations skill
+└── handoff.md          # Subagent delegation skill
 ```
 
 ## Dependencies
@@ -60,8 +69,10 @@ Foundation skills may depend on each other:
 - **pencil** depends on: doc, cache
 - **cache** depends on: doc, git
 - **git** depends on: cache, doc
+- **handoff** depends on: cache, Agent, sdlc state
 
 ## Version
 
 **Created**: 2026-03-08
 **SDLC Version**: 3.2 (Flow-Based)
+**Updated**: 2026-03-09 (added handoff skill)
