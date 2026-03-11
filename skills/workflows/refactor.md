@@ -2,6 +2,8 @@
 
 **Purpose**: Improve code structure without changing functionality.
 
+> **Critical**: Always start with `/sdlc understand` before refactoring. Understanding the existing architecture and relationships is essential to avoid breaking functionality during refactoring.
+
 ## When to Use
 
 Use this workflow when:
@@ -17,10 +19,22 @@ Use this workflow when:
 START
   │
   ▼
-cr → spec → coding → test → verify → secure → cr → commit → pr → MERGE
+understand → cr → spec → coding → test → verify → secure → cr → commit → pr → MERGE
 ```
 
+**First Step is Non-Negotiable:**
+1. `understand` - Know the current architecture before changing it
+
 ## Phase Details
+
+### 0. Understand (Required First Step)
+```bash
+/sdlc understand [scope]
+```
+- Map current architecture and dependencies
+- Identify integration points
+- Understand data flow and relationships
+- **Critical for refactoring - you must know what you're changing**
 
 ### 1. Initial Code Review
 ```bash
@@ -131,34 +145,53 @@ cr → spec → coding → test → verify → secure → cr → commit → pr �
 # Start refactor workflow
 /sdlc start refactor "Extract service layer from controllers"
 
-# Initial CR - identify issues
+# Step 1: Understand current architecture (MANDATORY)
+/sdlc understand controllers
+# → Map current dependencies, data flow, integration points
+
+# Step 2: Initial CR - identify issues
 /sdlc cr
 # → Found: Tight coupling, 500+ line controllers, no testability
 
-# Create refactoring spec
+# Step 3: Create refactoring spec
 /sdlc spec "Design service layer architecture with dependency injection"
 
-# [Manual coding - implement refactoring]
+# Step 4: [Manual coding - implement refactoring]
 
-# Run tests
+# Step 5: Run tests
 /sdlc test
 
-# Verify behavior unchanged
+# Step 6: Verify behavior unchanged
 /sdlc verify
 
-# Security check
+# Step 7: Security check
 /sdlc secure
 
-# Final code review
+# Step 8: Final code review
 /sdlc cr
 
-# Commit refactoring
+# Step 9: Commit refactoring
 /sdlc commit
 
-# Create PR
+# Step 10: Create PR
 /sdlc pr
 
 # [Merge after review]
+```
+
+## Anti-Pattern: What NOT to Do
+
+```bash
+# ❌ BAD: Refactoring without understanding
+/sdlc cr
+# → Start refactoring immediately
+# → Breaks hidden dependencies
+# → Introduces subtle bugs
+
+# ✅ GOOD: Understand first, then refactor
+/sdlc understand controllers  # Know the current system
+/sdlc cr                      # Then plan changes
+# → Safer refactoring, fewer bugs, better results
 ```
 
 ## Refactoring Categories
@@ -205,6 +238,7 @@ cr → spec → coding → test → verify → secure → cr → commit → pr �
 
 ## Completion Checklist
 
+- [ ] **Understand phase completed** (current architecture mapped)
 - [ ] Initial issues documented
 - [ ] Refactoring spec created
 - [ ] Code refactored

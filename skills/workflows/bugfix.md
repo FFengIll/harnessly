@@ -2,6 +2,8 @@
 
 **Purpose**: Fix bugs efficiently with proper testing and verification.
 
+> **Critical**: Always start with `/sdlc understand` before debugging. Understanding the existing code architecture helps identify root causes faster and prevents introducing new bugs.
+
 ## When to Use
 
 Use this workflow when:
@@ -16,17 +18,31 @@ Use this workflow when:
 START
   │
   ▼
-debug → coding → test → verify → secure → commit → pr → MERGE
+understand → debug → coding → test → verify → secure → commit → pr → MERGE
 ```
 
+**First Step is Non-Negotiable:**
+1. `understand` - Build context, understand how the code currently works
+2. Then debug with full context
+
 ## Phase Details
+
+### 0. Understand (Required First Step)
+```bash
+/sdlc understand [scope]
+```
+- Build context of the codebase architecture
+- Understand how the affected components currently work
+- Identify related code and integration points
+- Check architecture cache for relevant context
+- **Do not skip! Trying to debug without understanding causes more bugs**
 
 ### 1. Debug
 ```bash
 /sdlc debug "Analyze bug root cause"
 ```
 - Reproduce the bug
-- Identify root cause
+- Identify root cause (now easier with context from understand)
 - Document bug behavior
 - Create minimal reproduction
 
@@ -108,28 +124,47 @@ debug → coding → test → verify → secure → commit → pr → MERGE
 # Start bugfix workflow
 /sdlc start bugfix "Fix user session timeout"
 
-# Debug phase
+# Step 1: Understand the codebase (MANDATORY)
+/sdlc understand auth/session
+# → Creates/reuses docs/arch/main/auth-session-arch.md
+# → Now you understand how sessions currently work
+
+# Step 2: Debug phase (with full context)
 /sdlc debug "Session expires after 5 minutes instead of 24h"
 # → Found: Missing refresh token logic in session middleware
 
-# [Manual coding - implement fix]
+# Step 3: [Manual coding - implement fix]
 
-# Run tests
+# Step 4: Run tests
 /sdlc test
 
-# Verify fix
+# Step 5: Verify fix
 /sdlc verify
 
-# Security check
+# Step 6: Security check
 /sdlc secure
 
-# Commit fix
+# Step 7: Commit fix
 /sdlc commit
 
-# Create PR
+# Step 8: Create PR
 /sdlc pr
 
 # [Merge after review]
+```
+
+## Anti-Pattern: What NOT to Do
+
+```bash
+# ❌ BAD: Debugging without understanding
+/sdlc debug "Session timeout issue"
+# [Try to fix without understanding the session system]
+# → Likely to introduce new bugs or miss edge cases
+
+# ✅ GOOD: Understanding first, then debugging
+/sdlc understand auth/session  # Always first
+/sdlc debug "Session timeout"  # Now with full context
+# → Faster debugging, better fix, fewer side effects
 ```
 
 ## Bug Report Template
@@ -178,6 +213,7 @@ Fix:
 
 ## Completion Checklist
 
+- [ ] **Understand phase completed** (relevant architecture cache reviewed)
 - [ ] Bug root cause identified
 - [ ] Fix implemented
 - [ ] Regression tests added
@@ -190,18 +226,19 @@ Fix:
 
 ## Key Differences from Feature Workflow
 
-| Feature | Bugfix |
-|---------|--------|
-| Start with research | Start with debug |
-| Create full spec | Document bug/fix |
-| extensive coding | Minimal changes |
-| Full verify | Regression focused |
-| Initial CR needed | CR after fix |
+| Aspect | Feature | Bugfix |
+|--------|---------|--------|
+| **Start with** | understand → research → spec | **understand → debug** |
+| **Spec phase** | Full specification required | Brief bug/fix documentation |
+| **Coding approach** | Extensive new code | Minimal targeted changes |
+| **Verification** | Full spec compliance | Regression focused |
+| **Code review** | CR during implementation | CR after fix is complete |
 
 ## Notes
 
-- Bugfix workflow is **faster** than feature workflow
-- Skips research and spec phases (uses debug instead)
+- **Understand phase is mandatory** - prevents "fixing one thing, breaking another"
+- Bugfix workflow is **faster** than feature workflow after understand phase
+- Uses debug instead of full research + spec (but still needs understand first)
 - Focus on minimal, targeted changes
 - Always add regression tests
 - Consider hotfix process for production bugs

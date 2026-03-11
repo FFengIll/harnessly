@@ -2,6 +2,8 @@
 
 **Purpose**: Develop new features from research to production deployment.
 
+> **Critical**: Always start with `/sdlc understand` and `/sdlc spec` before any coding. This ensures you understand the existing codebase architecture and have a clear specification before implementation.
+
 ## When to Use
 
 Use this workflow when:
@@ -16,10 +18,24 @@ Use this workflow when:
 START
   │
   ▼
-research → spec → coding → test → verify → secure → cr → commit → pr → MERGE
+understand → research → spec → coding → test → verify → secure → cr → commit → pr → MERGE
 ```
 
+**First Two Steps are Non-Negotiable:**
+1. `understand` - Build context, create architecture cache
+2. `spec` - Define requirements and design
+
 ## Phase Details
+
+### 0. Understand (Required First Step)
+```bash
+/sdlc understand [scope]
+```
+- Build context of the codebase architecture
+- Create or reuse architecture cache in `docs/arch/`
+- Identify relevant components and integration points
+- Understand existing patterns and conventions
+- **Do not skip this step!**
 
 ### 1. Research
 ```bash
@@ -30,7 +46,7 @@ research → spec → coding → test → verify → secure → cr → commit �
 - Document findings
 - Identify potential risks
 
-### 2. Spec
+### 2. Spec (Required Before Coding)
 ```bash
 /sdlc spec "Design feature specification"
 ```
@@ -38,6 +54,7 @@ research → spec → coding → test → verify → secure → cr → commit �
 - Design APIs and interfaces
 - Document data structures
 - Create implementation plan
+- **Must be completed before coding starts**
 
 ### 3. Coding
 ```
@@ -46,6 +63,7 @@ research → spec → coding → test → verify → secure → cr → commit �
 - Implement the feature based on spec
 - Write code following project conventions
 - Add inline documentation
+- **Only start after understand + spec are complete**
 
 ### 4. Test
 ```bash
@@ -123,33 +141,51 @@ research → spec → coding → test → verify → secure → cr → commit �
 # Start feature workflow
 /sdlc start feature "User authentication"
 
-# Execute research phase
+# Step 1: Understand the codebase (MANDATORY)
+/sdlc understand auth
+# → Creates/reuses docs/arch/main/auth-arch.md
+
+# Step 2: Research authentication approaches
 /sdlc research "Evaluate auth libraries: NextAuth vs Clerk vs custom"
 
-# Create specification
+# Step 3: Create specification (MANDATORY BEFORE CODING)
 /sdlc spec "Define auth endpoints, session management, and security"
+# → Creates docs/spec/auth-spec.md
 
-# [Manual coding - implement the feature]
+# Step 4: [Manual coding - implement the feature based on spec]
 
-# Run tests after coding
+# Step 5: Run tests after coding
 /sdlc test
 
-# Verify implementation matches spec
+# Step 6: Verify implementation matches spec
 /sdlc verify
 
-# Security check
+# Step 7: Security check
 /sdlc secure
 
-# Code review
+# Step 8: Code review
 /sdlc cr
 
-# Commit changes
+# Step 9: Commit changes
 /sdlc commit
 
-# Create pull request
+# Step 10: Create pull request
 /sdlc pr
 
 # [Merge after review approval]
+```
+
+## Anti-Pattern: What NOT to Do
+
+```bash
+# ❌ BAD: Jumping straight to coding
+/sdlc start feature "User authentication"
+# [Start coding immediately without understanding or spec]
+
+# ✅ GOOD: Following the proper workflow
+/sdlc understand    # Always first
+/sdlc spec          # Always second
+# [Then code based on understanding and spec]
 ```
 
 ## Navigation Commands
@@ -170,9 +206,10 @@ research → spec → coding → test → verify → secure → cr → commit �
 
 ## Completion Checklist
 
+- [ ] **Understand phase completed** (architecture cache created/reused)
 - [ ] Research documented
 - [ ] Spec approved
-- [ ] Code implemented
+- [ ] Code implemented (only after spec is complete)
 - [ ] All tests passing
 - [ ] Spec requirements verified
 - [ ] Security scan clean
@@ -182,8 +219,9 @@ research → spec → coding → test → verify → secure → cr → commit �
 
 ## Notes
 
+- **The first two phases (understand + spec) are non-negotiable** - they prevent costly mistakes
 - The **coding** phase is manual - all other phases are automated
 - Use `/doc`, `/pencil`, `/cache` anytime during workflow
 - Each phase validates specific quality aspects
-- Can skip phases with documented reason
+- Can skip later phases with documented reason (but not understand + spec)
 - Test phase includes multiple check types

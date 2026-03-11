@@ -11,16 +11,25 @@ Software Development Lifecycle management.
 ## Quick Start
 
 ```bash
-# Most common: run individual phases
-/sdlc test
-/sdlc verify
-/sdlc commit
-/sdlc pr
+# Recommended approach: Start with understand and spec
+/sdlc understand       # Build context, create architecture cache
+/sdlc spec "Describe change"  # Write specification
 
-# Or use a workflow
+# Then proceed with implementation
+/sdlc coding           # Write code based on spec
+/sdlc test             # Run tests
+/sdlc commit           # Commit changes
+
+# Or use a workflow (includes understand and spec by default)
 /sdlc start quick "Hotfix login bug"
 /sdlc next
 ```
+
+> **Important**: Always run `/sdlc understand` and `/sdlc spec` before coding. This prevents:
+> - Making changes without understanding existing code
+> - Implementing features that don't match requirements
+> - Introducing bugs due to missing context
+> - Wasting time on rework caused by misunderstandings
 
 ## Key Principle
 
@@ -42,10 +51,12 @@ Software Development Lifecycle management.
 
 | Type | Description | Workflow |
 |------|-------------|----------|
-| `quick` | Small changes | **coding → test → commit → pr** |
-| `feature` | New features | understand → research → spec → coding → test → verify → commit → pr |
-| `bugfix` | Bug fixes | understand → debug → coding → test → verify → commit → pr |
+| `quick` | Small changes | **understand → spec → coding → test → commit → pr** |
+| `feature` | New features | **understand → research → spec → coding → test → verify → commit → pr** |
+| `bugfix` | Bug fixes | **understand → debug → coding → test → verify → commit → pr** |
 | `research` | Research | understand → research → doc → END |
+
+> **Best Practice**: Always start with `understand` and `spec` phases to avoid jumping into coding without sufficient context. Even for small changes, taking time to understand the codebase and write a brief spec prevents costly mistakes.
 
 ### Phase Commands
 
@@ -64,25 +75,31 @@ Software Development Lifecycle management.
 ## Workflows
 
 ```
-QUICK:    coding → test → commit → pr
+QUICK:    understand → spec → coding → test → commit → pr
 FEATURE:  understand → research → spec → coding → test → verify → commit → pr
 BUGFIX:   understand → debug → coding → test → verify → commit → pr
 RESEARCH: understand → research → doc → END
 ```
 
+> **Default Recommendation**: Start every workflow with `/sdlc understand` followed by `/sdlc spec`. This ensures you understand the existing codebase and have a clear plan before writing code.
+
 ## Examples
 
 ```bash
-# Quick fix - fastest path
-/sdlc start quick "Fix typo"
-/sdlc next  # goes: coding → test → commit → pr
+# Recommended: Start with understand and spec
+/sdlc understand
+/sdlc spec "Fix typo in header"
 
-# Individual phases
+# Or use quick workflow (includes understand + spec)
+/sdlc start quick "Fix typo"
+/sdlc next  # goes: understand → spec → coding → test → commit → pr
+
+# Individual phases (after understand + spec)
 /sdlc test lint
 /sdlc verify spec/auth.md
 /sdlc commit "fix: login bug"
 
-# Jump around
+# Jump around (only if you've already done understand + spec)
 /sdlc phase commit
 /sdlc skip verify
 ```
@@ -142,10 +159,21 @@ Branch: quick/fix-typo
 
 ## Best Practices
 
-1. Use phases independently when you know what you need
-2. Use workflows for tracking multi-step tasks
-3. Skip freely - you know what you're doing
-4. `/sdlc verify` ensures implementation matches spec
+1. **Always start with `/sdlc understand`** - Build context and create architecture cache
+2. **Always write specs with `/sdlc spec`** - Even for small changes, document what you're doing
+3. **Use workflows for tracking** - Multi-step tasks benefit from state tracking
+4. **Skip freely but with caution** - You can skip phases, but understand + spec should stay
+5. **`/sdlc verify` ensures implementation matches spec** - Quality check before committing
+
+### Why Always Start with Understand + Spec?
+
+| Without Understand + Spec | With Understand + Spec |
+|--------------------------|----------------------|
+| Jump into code blindly | Understand existing patterns first |
+| Guess at requirements | Define what success looks like |
+| Create technical debt | Build on architecture cache |
+| Risk breaking things | Identify integration points early |
+| Rework and revisions | Get it right the first time |
 
 ## Migration
 

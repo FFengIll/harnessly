@@ -2,6 +2,8 @@
 
 **Purpose**: Explore topics and document findings without implementation.
 
+> **Critical**: Always start with `/sdlc understand` to understand the current codebase before researching external solutions. This ensures your research considers existing architecture and constraints.
+
 ## When to Use
 
 Use this workflow when:
@@ -18,10 +20,22 @@ Use this workflow when:
 START
   │
   ▼
-research → doc → discuss → END
+understand → research → doc → discuss → END
 ```
 
+**First Step is Non-Negotiable:**
+1. `understand` - Know what you currently have before researching alternatives
+
 ## Phase Details
+
+### 0. Understand (Required First Step)
+```bash
+/sdlc understand [scope]
+```
+- Understand current architecture and implementation
+- Identify constraints and integration points
+- Review existing patterns and conventions
+- **Research should consider what you already have**
 
 ### 1. Research
 ```bash
@@ -89,19 +103,38 @@ research → doc → discuss → END
 # Start research workflow
 /sdlc start research "Evaluate real-time collaboration solutions"
 
-# Research phase
+# Step 1: Understand current architecture (MANDATORY)
+/sdlc understand
+# → Learn about current data flow, state management, networking layer
+
+# Step 2: Research phase
 /sdlc research "Compare Yjs, Automerge, and custom CRDT implementation"
 # → Creates comparison table, performance benchmarks, POC code
 
-# Document findings
+# Step 3: Document findings
 /sdlc doc "Create technical proposal with recommendation"
 # → Generates ADR document with pros/cons and final recommendation
 
-# Discuss with team
+# Step 4: Discuss with team
 /sdlc discuss "Present findings to engineering team"
 # → Get feedback, make decision, plan next steps
 
 # [END - or transition to feature workflow if implementing]
+```
+
+## Anti-Pattern: What NOT to Do
+
+```bash
+# ❌ BAD: Research without understanding current system
+/sdlc research "Add real-time collaboration"
+# → Proposes solutions that don't fit existing architecture
+# → Misses integration challenges
+# → Wastes time researching incompatible options
+
+# ✅ GOOD: Understand first, then research
+/sdlc understand     # Know what you have
+/sdlc research       # Research solutions that fit
+# → Faster research, better recommendations, smoother implementation
 ```
 
 ## Research Output Template
@@ -170,6 +203,7 @@ research → doc → discuss → END
 
 ## Completion Checklist
 
+- [ ] **Understand phase completed** (know current architecture)
 - [ ] Research questions defined
 - [ ] Investigation completed
 - [ ] Findings documented
