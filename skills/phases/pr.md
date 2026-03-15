@@ -1,8 +1,8 @@
 # /pr
 
-/pr generates pull request titles and descriptions based on commit history and code changes. Works standalone or within SDLC workflows.
+/pr generates pull request titles and descriptions based on code changes and feature logic. Works standalone or within SDLC workflows.
 
-**Purpose**: Generate PR content (title + description) for code integration
+**Purpose**: Generate PR content that describes what changed and why, from a feature/logic perspective
 
 ## Usage
 
@@ -63,29 +63,36 @@ git fetch origin <base-branch>  # default: origin/main
 
 **Important:** Run this step first and wait for completion. Do NOT run in parallel with subsequent git commands.
 
-### 2. Get Commit History and Full Diff Together
+### 2. Understand Code Changes
 
 ```bash
-git log <base-branch>..HEAD --oneline    # Commit history - intent
-git diff <base-branch>..HEAD             # Full diff - reality
-git diff <base-branch>..HEAD --stat      # Changed files summary
+git log <base-branch>..HEAD --oneline    # Reference: commit history for context
+git diff <base-branch>..HEAD             # Primary: full diff - what actually changed
+git diff <base-branch>..HEAD --stat      # Overview: changed files summary
 ```
 
-**Why both?** Commit messages tell *why* changes were made, diff shows *what* actually changed. Read together as a unified view.
+**Focus on the diff** - The commit messages are only for context. The diff tells you:
+- What features were added/removed/modified
+- How the code logic changed
+- What the user-facing impact is
 
 ### 3. Write PR Title
 
 - Follow commit message style: `[prefix]: [brief description]`
 - Use lowercase, keep under 72 characters
 - If multiple commit types, use dominant one or `feat:`
+- Describe the feature/logic change, not a summary of commits
 
 ### 4. Write PR Description
 
-- Start with brief summary (1-2 sentences)
-- Categorize into **Major** (core functionality, significant features) and **Minor** (small improvements, docs)
-- Use `-` for bullet points, keep concise
-- Describe what changed, not which commits made the change
-- Focus on the end result and user-facing impact
+**Focus on feature logic and user impact, not commit history:**
+
+- Start with brief summary (1-2 sentences) - what problem was solved
+- Organize by **functional areas** or **logical changes**, not by commits
+- **Major**: Core features, significant logic changes, user-facing functionality
+- **Minor**: Implementation details, refactoring, cleanup
+- Describe the end result and user-facing impact
+- Think: "What would a reviewer need to know to understand this change?"
 
 ### 5. Test Plan (Optional)
 
@@ -96,14 +103,15 @@ git diff <base-branch>..HEAD --stat      # Changed files summary
 
 ```markdown
 ## Summary
-[1-2 sentence summary of what this PR does and why]
+[1-2 sentences: What problem was solved? What's the user-facing change?]
 
-### Major: *(optional title)*
-- [Change description]
-- [Change description]
+### Major: [Functional Area]
+- [Feature/logic change and its impact]
+- [Feature/logic change and its impact]
 
-### Minor: *(optional title)*
-- [Change description]
+### Minor: [Implementation Details]
+- [Refactoring, cleanup, or internal changes]
+```
 
 ## Test Plan
 - [ ] [Test case 1]
@@ -122,22 +130,21 @@ chore: update dependencies
 
 **Output PR:**
 ```
-refactor: provider command refactoring
+refactor: unified provider command with interactive mode
 
 ## Summary
-Refactor provider management commands into a unified provider command with interactive mode and UUID-based operations.
+Consolidates fragmented provider management commands into a single interactive command, simplifying user workflow and improving code maintainability.
 
-### Major: Provider Command Refactoring
-- Merge add, list, delete commands into single provider command with interactive mode
-- Add interactive mode for provider management (add, list, update, delete, get)
-- Update to use UUID-based provider operations instead of name-based lookups
+### Major: Provider Command UX
+- Interactive mode replaces separate add/list/delete commands with a unified interface
+- UUID-based lookups replace name-based operations for more reliable provider identification
+- Single entry point for all provider operations (add, list, get, update, delete)
 
-### Minor: Code Cleanup
-- Rename add.go to provider_add.go for consistency
-- Add DeleteProviderByUUID and UpdateProviderByUUID methods to AppManager
-- Update CLI entry point to use new ProviderCommand
+### Minor: Implementation
+- Rename add.go to provider_add.go for consistency with new structure
+- Add UUID-based CRUD methods to AppManager (DeleteProviderByUUID, UpdateProviderByUUID)
 - Remove unused shell command and tool migration code
-- Remove icons from output for cleaner terminal display
+- Clean up terminal output by removing decorative icons
 ```
 
 ## Create PR
