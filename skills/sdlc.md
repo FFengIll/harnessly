@@ -29,46 +29,46 @@ Software Development Lifecycle management with intelligent intent detection.
 
 ## Intent Detection
 
-| Your Request | Detected Action | Creates Files? |
-|--------------|----------------|----------------|
-| "understand the codebase" | `/sdlc understand` | ✅ Yes (arch cache) |
-| "explore payment module" | Quick explore (no skill) | ❌ No |
-| "how does auth work?" | Quick explain (no skill) | ❌ No |
-| "write a spec for auth" | `/sdlc spec` | ✅ Yes |
-| "implement login" | `/sdlc coding` | ✅ Yes |
-| "run tests" | `/sdlc test` | ❌ No |
-| "review my changes" | `/sdlc cr` | ✅ Yes (review report) |
-| "check for bugs" | `/sdlc cr` | ✅ Yes (review report) |
-| "fix the login bug" | bugfix workflow | ✅ Yes |
-| "add user API" | feature workflow | ✅ Yes |
+| Your Request              | Detected Action          | Creates Files?        |
+| ------------------------- | ------------------------ | --------------------- |
+| "understand the codebase" | `/sdlc understand`       | ✅ Yes (arch cache)    |
+| "explore payment module"  | Quick explore (no skill) | ❌ No                  |
+| "how does auth work?"     | Quick explain (no skill) | ❌ No                  |
+| "write a spec for auth"   | `/sdlc spec`             | ✅ Yes                 |
+| "implement login"         | `/sdlc coding`           | ✅ Yes                 |
+| "run tests"               | `/sdlc test`             | ❌ No                  |
+| "review my changes"       | `/sdlc cr`               | ✅ Yes (review report) |
+| "check for bugs"          | `/sdlc cr`               | ✅ Yes (review report) |
+| "fix the login bug"       | bugfix workflow          | ✅ Yes                 |
+| "add user API"            | feature workflow         | ✅ Yes                 |
 
 > **Note**: "explore" and "how does" questions are answered directly without creating files. Use "understand" to build reusable architecture cache.
 | "修复登录bug" | bugfix workflow (中文) |
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `/sdlc understand` | Build context, explore codebase, discuss architecture |
-| `/sdlc cr [scope]` | Code review - find issues, check quality (staged/files/folders) |
-| `/sdlc spec [name]` | Write specification |
-| `/sdlc coding [desc]` | Write code based on spec |
-| `/sdlc test [type]` | Run tests (lint + unit + e2e) |
-| `/sdlc verify [spec]` | Check vs spec |
-| `/sdlc commit [msg]` | Commit changes |
-| `/sdlc pr [action]` | Create/manage PR |
-| `/sdlc debug [issue]` | Debug bugs |
-| `/sdlc research [topic]` | Research solutions |
+| Command                  | Description                                                     |
+| ------------------------ | --------------------------------------------------------------- |
+| `/sdlc understand`       | Build context, explore codebase, discuss architecture           |
+| `/sdlc cr [scope]`       | Code review - find issues, check quality (staged/files/folders) |
+| `/sdlc spec [name]`      | Write specification                                             |
+| `/sdlc coding [desc]`    | Write code based on spec                                        |
+| `/sdlc test [type]`      | Run tests (lint + unit + e2e)                                   |
+| `/sdlc verify [spec]`    | Check vs spec                                                   |
+| `/sdlc commit [msg]`     | Commit changes                                                  |
+| `/sdlc pr [action]`      | Create/manage PR                                                |
+| `/sdlc debug [issue]`    | Debug bugs                                                      |
+| `/sdlc research [topic]` | Research solutions                                              |
 
 ## Workflows
 
-| Type | Description | Workflow |
-|------|-------------|----------|
-| `minor` | Minor modifications | coding → test → commit |
-| `quick` | Small changes | understand → spec → coding → test → commit → pr |
-| `feature` | New features | understand → research → spec → coding → test → verify → commit → pr |
-| `bugfix` | Bug fixes | understand → debug → coding → test → verify → commit → pr |
-| `research` | Research | understand → research → doc → END |
+| Type       | Description         | Workflow                                                            |
+| ---------- | ------------------- | ------------------------------------------------------------------- |
+| `minor`    | Minor modifications | coding → test → commit                                              |
+| `quick`    | Small changes       | understand → spec → coding → test → commit → pr                     |
+| `feature`  | New features        | understand → research → spec → coding → test → verify → commit → pr |
+| `bugfix`   | Bug fixes           | understand → debug → coding → test → verify → commit → pr           |
+| `research` | Research            | understand → research → doc → END                                   |
 
 ```bash
 /sdlc start quick "Fix typo"     # Start workflow
@@ -135,11 +135,11 @@ docs/
 
 ## Migration Notes
 
-| Old Command | New Command |
-|-------------|-------------|
-| `/spec` | `/sdlc spec` |
+| Old Command   | New Command                 |
+| ------------- | --------------------------- |
+| `/spec`       | `/sdlc spec`                |
 | `/git-commit` | `/commit` or `/sdlc commit` |
-| `/codereview` | `/sdlc cr` |
+| `/codereview` | `/sdlc cr`                  |
 
 **`/commit` and `/pr` are now standalone** - use anytime without starting an SDLC workflow.
 
@@ -223,11 +223,11 @@ When routing to a workflow, invoke:
 
 ## Skill Behavior Summary
 
-| Skill | Creates Files | Purpose |
-|-------|--------------|---------|
-| `understand` | ✅ Yes (`docs/arch/`, `docs/understand/`) | Architecture cache, reusable documentation |
-| `cr` | ✅ Yes (`docs/cr/`) | Code review report with findings |
-| `explore/read` | ❌ No | Quick inspection, no artifacts |
+| Skill          | Creates Files                            | Purpose                                    |
+| -------------- | ---------------------------------------- | ------------------------------------------ |
+| `understand`   | ✅ Yes (`docs/arch/`, `docs/understand/`) | Architecture cache, reusable documentation |
+| `cr`           | ✅ Yes (`docs/cr/`)                       | Code review report with findings           |
+| `explore/read` | ❌ No                                     | Quick inspection, no artifacts             |
 
 ### When to use which
 
@@ -272,3 +272,58 @@ Always show what was detected before executing:
 📋 Scope: <extracted_scope>
 → Executing: <command or workflow>
 ```
+
+---
+
+# Related Skills
+
+The SDLC system is composed of the following skills organized under `sdlc/`:
+
+## Phase Skills (`skills/sdlc/phases/`)
+
+| Skill         | Description                                   | File                   |
+| ------------- | --------------------------------------------- | ---------------------- |
+| `/understand` | Build architecture cache and explore codebase | `phases/understand.md` |
+| `/cr`         | Code review - find issues and check quality   | `phases/cr.md`         |
+| `/spec`       | Write specifications                          | `phases/spec.md`       |
+| `/coding`     | Write code based on specs                     | `phases/coding.md`     |
+| `/test`       | Run tests (lint + unit + e2e)                 | `phases/test.md`       |
+| `/verify`     | Check implementation vs spec                  | `phases/verify.md`     |
+| `/commit`     | Commit changes                                | `phases/commit.md`     |
+| `/pr`         | Create and manage pull requests               | `phases/pr.md`         |
+| `/debug`      | Debug and fix bugs                            | `phases/debug.md`      |
+| `/research`   | Research solutions and best practices         | `phases/research.md`   |
+| `/secure`     | Security review and analysis                  | `phases/secure.md`     |
+
+## Workflow Skills (`skills/sdlc/workflows/`)
+
+| Skill      | Description                       | File                    |
+| ---------- | --------------------------------- | ----------------------- |
+| `minor`    | Minor modifications workflow      | `workflows/minor.md`    |
+| `feature`  | New features development workflow | `workflows/feature.md`  |
+| `bugfix`   | Bug fixes workflow                | `workflows/bugfix.md`   |
+| `refactor` | Code refactoring workflow         | `workflows/refactor.md` |
+| `research` | Research workflow                 | `workflows/research.md` |
+
+## Flow Control Skills (`skills/sdlc/flow/`)
+
+| Skill          | Description            | File             |
+| -------------- | ---------------------- | ---------------- |
+| `/sdlc start`  | Start a workflow       | `flow/start.md`  |
+| `/sdlc next`   | Advance to next phase  | `flow/next.md`   |
+| `/sdlc skip`   | Skip current phase     | `flow/skip.md`   |
+| `/sdlc status` | Show workflow progress | `flow/status.md` |
+| `/sdlc phase`  | Change current phase   | `flow/phase.md`  |
+
+## Foundation Skills (`skills/sdlc/foundation/`)
+
+| Skill         | Description                  | File                        |
+| ------------- | ---------------------------- | --------------------------- |
+| `archive`     | Archive documentation        | `foundation/archive.md`     |
+| `cache`       | Manage architecture cache    | `foundation/cache.md`       |
+| `discuss`     | Discussion and collaboration | `foundation/discuss.md`     |
+| `doc`         | Documentation management     | `foundation/doc.md`         |
+| `git`         | Git operations               | `foundation/git.md`         |
+| `git-resolve` | Resolve git conflicts        | `foundation/git-resolve.md` |
+| `handoff`     | Handoff between contexts     | `foundation/handoff.md`     |
+| `pencil`      | Quick note-taking            | `foundation/pencil.md`      |
