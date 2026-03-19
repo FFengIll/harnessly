@@ -190,16 +190,16 @@ When used in SDLC workflow (`/sdlc commit`), additional checks apply:
 
 Code Quality:
 ✓ All tests passing
-✓ Verification complete (100% requirements met)
+✓ Validation complete (100% requirements met)
 ✓ Security scan passed (no critical issues)
 ✓ Code review approved
 
 Documentation:
-✓ Spec document: .sdlc/docs/spec/20260308-user-auth.md
-✓ Test report: .sdlc/docs/test/20260308-auth-test-report.md
-✓ Verification: .sdlc/docs/verify/20260308-auth-verification.md
-✓ Security: .sdlc/docs/secure/20260308-auth-security.md
-✓ Code review: .sdlc/docs/cr/20260308-auth-review.md
+✓ Spec document: .sdlc/docs/auth-user-login-20240319.spec.md
+✓ Test report: .sdlc/docs/auth-user-login-20240319.test.md
+✓ Validation: .sdlc/docs/auth-user-login-20240319.validate.md
+✓ Security: .sdlc/docs/auth-user-login-20240319.secure.md
+✓ Code review: .sdlc/docs/auth-user-login-20240319.cr.md
 
 Files:
 ✓ No unintended changes
@@ -231,7 +231,7 @@ Features:
 - Email verification
 - Rate limiting
 
-Spec: .sdlc/docs/spec/20260308-user-auth.md
+Spec: .sdlc/docs/auth-user-login-20240319.spec.md
 Tests: 45/45 passing
 Coverage: 87%
 
@@ -294,7 +294,7 @@ Ready to commit. Use 'git commit' to finalize.
 
 - **Updates**: `sdlc.phase` = `commit`
 - **Creates**: Git commit
-- **Creates**: Commit log in `.sdlc/docs/commits/` (SDLC only)
+- **Creates**: Commit log in `.sdlc/docs/category-feature-date.commit.md` (SDLC only)
 - **Requires**: (SDLC only) `cr` phase completed with approval
 - **Next**: (SDLC only) Proceed to `/sdlc pr` phase
 

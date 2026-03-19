@@ -8,7 +8,7 @@ Provides implementation guidance and support based on specification documents.
 /sdlc coding [spec_file?]
 ```
 
-If no spec file is provided, the skill will look for the most recent spec in .sdlc/docs/spec/.
+If no spec file is provided, the skill will look for the most recent spec in .sdlc/docs/*.spec.md.
 
 ## Description
 
@@ -330,7 +330,7 @@ Would guide:
 ```
 
 Would:
-- Find the most recent spec in .sdlc/docs/spec/
+- Find the most recent spec in .sdlc/docs/*.spec.md
 - Provide guidance based on that spec
 - Ask for clarification if multiple specs exist
 

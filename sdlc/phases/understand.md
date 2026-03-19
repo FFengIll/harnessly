@@ -206,12 +206,12 @@ fi
 ### Understanding Reports (Secondary Output)
 
 ```
-.sdlc/docs/understand/YYYYMMDD-[scope]-understanding.md
+.sdlc/docs/category-feature-date.understand.md
 ```
 
 Examples:
-- `.sdlc/docs/understand/20260308-full-project-understanding.md`
-- `.sdlc/docs/understand/20260308-auth-module-understanding.md`
+- `project-overview-20240319.understand.md`
+- `auth-module-20240319.understand.md`
 
 ## Completion Checklist
 

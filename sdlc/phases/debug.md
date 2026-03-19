@@ -280,9 +280,11 @@ bcrypt.compare().
 
 ## Debug Output
 
-**Always save debug reports** to `.sdlc/docs/debug/YYYYMMDD-[name]-debug.md` where:
-- `YYYYMMDD` - Current date timestamp
-- `[name]` - Short bug identifier
+**Always save debug reports** to `.sdlc/docs/category-feature-date.debug.md` where:
+- `category` - Module/category
+- `feature` - Feature description
+- `date` - Date in YYYYMMDD format
+- `debug` - Document type for debug reports
 
 ## Completion Conditions
 
@@ -295,7 +297,7 @@ bcrypt.compare().
 ## State Integration
 
 - **Updates**: `sdlc.phase` = `debug`
-- **Creates**: Debug report in `.sdlc/docs/debug/`
+- **Creates**: Debug report in `.sdlc/docs/category-feature-date.debug.md`
 - **Workflow**: Bug fix workflow entry point
 - **Next**: Proceed to `/sdlc coding` to implement fix
 

@@ -360,9 +360,11 @@ Recommendations:
 
 ## Security Output
 
-**Always save security reports** to `.sdlc/.sdlc/docs/secure/YYYYMMDD-[name]-security-report.md` where:
-- `YYYYMMDD` - Current date timestamp
-- `[name]` - Feature or component name
+**Always save security reports** to `.sdlc/docs/category-feature-date.secure.md` where:
+- `category` - Module/category
+- `feature` - Feature or component name
+- `date` - Date in YYYYMMDD format
+- `secure` - Document type for security reports
 
 ## Best Practices
 
@@ -465,8 +467,8 @@ npm update
 ## State Integration
 
 - **Updates**: `sdlc.phase` = `secure`
-- **Creates**: Security report in `.sdlc/.sdlc/docs/secure/`
-- **Requires**: `verify` phase completed (implementation verified)
+- **Creates**: Security report in `.sdlc/docs/category-feature-date.secure.md`
+- **Requires**: `validate` phase completed (implementation validated)
 - **Next**: Proceed to deployment or back to coding for fixes
 
 ## Related Skills

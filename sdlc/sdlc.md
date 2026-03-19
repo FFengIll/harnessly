@@ -51,8 +51,8 @@ Software Development Lifecycle management with intelligent intent detection.
 | ------------------------ | --------------------------------------------------------------- |
 | `/sdlc understand`       | Build context, explore codebase, discuss architecture           |
 | `/sdlc cr [scope]`       | Code review - find issues, check quality (staged/files/folders) |
-| `/sdlc spec [name]`      | Write specification                                             |
-| `/sdlc harness [scope]`  | Write verification harness (invariants, flows, constraints)      |
+| `/sdlc spec [title]`     | Write specification                                             |
+| `/sdlc harness [title]`  | Write verification harness (invariants, flows, constraints)      |
 | `/sdlc coding [desc]`    | Write code based on spec                                        |
 | `/sdlc test [type]`      | Run tests (lint + unit + e2e)                                   |
 | `/sdlc validate [target]`| Validate against harness or user goal                            |
@@ -127,29 +127,64 @@ Workflows are created implicitly when you first describe what you want to do.
 ```
 .sdlc/
 ├── state.json             # Workflow state
-└── docs/                  # All SDLC documentation
-    ├── spec/              # Specifications
-    ├── harness/           # Verification harnesses (invariants, flows)
-    ├── validate/          # Validation reports (active testing results)
-    ├── research/          # Research documents
-    ├── arch/              # Architecture cache
-    ├── understand/        # Understanding reports
-    ├── pencil/            # Wireframes and designs
-    ├── cr/                # Code review reports
-    ├── test/              # Test reports
-    ├── secure/            # Security reports
-    ├── debug/             # Debug reports
-    ├── commits/           # Commit logs
-    ├── pr/                # PR logs
-    └── archive/           # Archived documents
+├── docs/                  # Working documents (flat structure)
+│   ├── auth-user-login-20240115.spec.md
+│   ├── auth-user-login-20240116.coding.md
+│   ├── auth-oauth-integration-20240116.research.md
+│   ├── payment-stripe-checkout-20240201.cr.md
+│   └── user-profile-edit-20240205.test.md
+├── harness/               # Verification harnesses (separate level)
+│   ├── auth-flow-invariants-20240115.harness.md
+│   └── payment-constraints-20240201.harness.md
+└── arch/                  # Architecture cache (separate level)
+    ├── overview-20240115.arch.md
+    └── auth-20240115.arch.md
 ```
+
+### Directory Structure
+
+| Directory | Purpose | Structure |
+|-----------|---------|-----------|
+| `docs/` | Working documents (spec, cr, test, etc.) | Flat, `category-feature-date.type.md` |
+| `harness/` | Verification harnesses | Flat, `category-feature-date.harness.md` |
+| `arch/` | Architecture cache | Flat, `[scope]-date.arch.md` |
+
+### File Naming Convention
+
+**Format**: `category-feature-date.type.md` (or `[scope]-date.type.md` for arch)
+
+| Part | Description | Example |
+|------|-------------|---------|
+| category/scope | Module/Category (lowercase) | `auth`, `payment`, `user`, `overview` |
+| feature | Feature description (kebab-case) | `user-login`, `stripe-checkout`, `flow-invariants` |
+| date | Date (YYYYMMDD) | `20240115` |
+| type | Document type | `spec`, `coding`, `test`, `cr`, `research`, `harness`, `arch` |
+
+**Document Types**:
+- `spec` - Specification documents (in `docs/`)
+- `coding` - Implementation guidance (in `docs/`)
+- `test` - Test reports (in `docs/`)
+- `validate` - Validation reports (in `docs/`)
+- `cr` - Code review reports (in `docs/`)
+- `secure` - Security review reports (in `docs/`)
+- `debug` - Debug reports (in `docs/`)
+- `research` - Research documents (in `docs/`)
+- `understand` - Understanding reports (in `docs/`)
+- `commit` - Commit logs (in `docs/`)
+- `pr` - PR logs (in `docs/`)
+- `harness` - Verification harnesses (in `harness/`)
+- `arch` - Architecture cache (in `arch/`)
 
 ## Best Practices
 
-1. **Always start with `/sdlc understand`** - Build context and create architecture cache
-2. **Always write specs with `/sdlc spec`** - Document what you're doing
-3. **Use smart mode for convenience** - Let AI detect the workflow
-4. **Use explicit commands for precision** - When you know exactly what phase you need
+1. **Use the flat structure for working docs** - All documents in `.sdlc/docs/` with consistent naming
+2. **Harnesses are special** - Verification harnesses go in `.sdlc/harness/` (separate level)
+3. **Filter by type** - Use `*.spec.md`, `*.cr.md`, etc. to find document types
+4. **Filter by category** - Use `auth-*.md` to find all auth-related documents
+5. **Always start with `/sdlc understand`** - Build context and create architecture cache
+6. **Always write specs with `/sdlc spec`** - Document what you're doing
+7. **Use smart mode for convenience** - Let AI detect the workflow
+8. **Use explicit commands for precision** - When you know exactly what phase you need
 
 ## Migration Notes
 
@@ -261,8 +296,8 @@ When routing to a workflow, invoke:
 
 | Skill          | Creates Files                            | Purpose                                    |
 | -------------- | ---------------------------------------- | ------------------------------------------ |
-| `understand`   | ✅ Yes (`.sdlc/docs/arch/`, `.sdlc/docs/understand/`) | Architecture cache, reusable documentation |
-| `cr`           | ✅ Yes (`.sdlc/docs/cr/`)                 | Code review report with findings           |
+| `understand`   | ✅ Yes (`.sdlc/docs/arch/`, `.sdlc/docs/*.understand.md`) | Architecture cache, reusable documentation |
+| `cr`           | ✅ Yes (`.sdlc/docs/*.cr.md`)             | Code review report with findings           |
 | `explore/read` | ❌ No                                     | Quick inspection, no artifacts             |
 
 ### When to use which
@@ -273,11 +308,11 @@ When routing to a workflow, invoke:
 
 - **User says "understand/analyze architecture/map codebase/build context"** → Invoke `/sdlc understand`
   - Creates architecture cache in `.sdlc/docs/arch/`
-  - Generates understanding report in `.sdlc/docs/understand/`
+  - Generates understanding report as `.sdlc/docs/category-feature-date.understand.md`
   - For reuse across multiple tasks
 
 - **User says "review/check/audit/assess/find issues"** → Invoke `/sdlc cr`
-  - Creates code review report in `.sdlc/docs/cr/`
+  - Creates code review report as `.sdlc/docs/category-feature-date.cr.md`
   - Finds bugs, security issues, quality problems
 
 ## Context Extraction
@@ -296,7 +331,7 @@ if [ -f .sdlc/state.json ]; then
 fi
 
 # Get latest spec
-latest_spec=$(find .sdlc/docs/spec -name "*.md" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
+latest_spec=$(find .sdlc/docs -name "*.spec.md" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
 ```
 
 ## Execution Feedback

@@ -25,7 +25,7 @@ Creates detailed technical specification documents based on research findings an
    - If no relevant cache exists, generate it first with `/sdlc understand [scope]`
 
 3. **Write the Spec Document**
-   - Save to `./.sdlc/docs/spec/YYYYMMDD-[title]-spec.md`
+   - Save to `./.sdlc/docs/category-feature-date.spec.md`
    - Write the spec along with your understanding and design decisions
    - Keep specs key-focused and guiding-oriented
    - Pay attention to model definitions and file/module/function abstractions
@@ -62,7 +62,18 @@ If cache is expired or missing, regenerate using `/sdlc understand [scope]`.
 
 ## Output Format
 
-Spec files are saved to `.sdlc/docs/spec/YYYYMMDD-[title]-spec.md`
+Spec files are saved to `.sdlc/docs/category-feature-date.spec.md`
+
+**Filename format**: `category-feature-date.type.md`
+- `category` - Module/category (e.g., `auth`, `payment`, `user`)
+- `feature` - Feature description in kebab-case (e.g., `user-login`, `oauth-integration`)
+- `date` - Date in YYYYMMDD format
+- `type` - Document type (`spec` for specifications)
+
+**Examples**:
+- `auth-user-login-20240319.spec.md`
+- `payment-stripe-checkout-20240319.spec.md`
+- `user-profile-edit-20240319.spec.md`
 
 Include:
 - Overview and scope
@@ -106,14 +117,14 @@ Include:
 ```bash
 /sdlc spec "Add OAuth to Auth"
 # Reads .sdlc/docs/arch/auth-arch.md for context
-# Writes .sdlc/docs/spec/20260318-add-oauth-to-auth-spec.md
+# Writes .sdlc/docs/auth-oauth-integration-20240319.spec.md
 ```
 
 ### Example 2: Feature Requiring New Cache
 
 ```bash
 /sdlc understand auth/providers    # Create cache first
-/sdlc spec "Add SAML Provider"     # Then write spec
+/sdlc spec "Add SAML Provider"     # Then write spec as auth-saml-provider-20240319.spec.md
 ```
 
 ## Integration
