@@ -1,13 +1,13 @@
-# vibe coding
+# Harnessly
 
 Config / prompt / plugins.
 
-# vibely
-My config & setting for vibe coding.
+# Harnessly
+My prompt for ai coding with harness.
 
-# tingly-spec
+# Tingly-spec
 
-A markdown writing plugin (support *.md and *.vibely) for coding task spec writing.
+A markdown writing plugin (support *.md) for coding task spec writing.
 
 ## Feature
 - `@` to trigger file search and auto-completion, then the spec is feasible to use in claude code, codex and so on.
