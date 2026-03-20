@@ -35,11 +35,13 @@ My prompt for ai coding with harness.
 * 相信流程的力量。
 
   Software Development Life Cycle (SDLC) 虽然古典，甚至略显传统，但它能教会我们的，远不止流程本身。
+
 * 不要试图让所有 SPEC 随代码实时同步。
 
   一般性的 SPEC，天然会滞后，这是常态，而非问题。
 
 * **验证型 SPEC 更关键。**
+  
   我们可以称之为 `Harness`。
 
 * 主动建设并沉淀 `Harness`：
