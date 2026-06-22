@@ -21,10 +21,17 @@ Generate pull request content that explains **why** the change exists and **what
 
 Follow this priority order and STOP at the first match:
 
-#### Priority 1 — Command arg
-If user provided a base (e.g. `/pr develop`), use it directly. Skip detection.
+#### Priority 1 — Command arg (SKIP SELECTION)
+If user provided a base (e.g. `/pr develop` or `/pr on main`), **use it directly and skip branch selection entirely**. 
 
-#### Priority 2 — Interactive branch selection (REQUIRED when no arg)
+**CRITICAL**: When a branch argument is provided, do NOT run `AskUserQuestion` for branch selection. Proceed directly to diff validation.
+
+Examples:
+- `/pr main` → Use `main` as base, skip selection
+- `/pr origin/develop` → Use `origin/develop` as base, skip selection  
+- `/pr on feature-branch` → Use `feature-branch` as base, skip selection
+
+#### Priority 2 — Interactive branch selection (ONLY when no arg provided)
 
 Run this command to get recent branches with upstream tracking info:
 ```bash
@@ -189,4 +196,4 @@ Provider management was scattered across 4 separate commands with inconsistent U
 
 ---
 
-**Version**: 1.12.0 | **Updated**: 2026-05-10
+**Version**: 1.13.0 | **Updated**: 2026-06-17
