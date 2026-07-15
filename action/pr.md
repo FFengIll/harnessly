@@ -1,199 +1,182 @@
 # /pr
 
-Generate pull request content that explains **why** the change exists and **what** it achieves.
-
-**Core Principle**: A good PR describes the purpose and impact, not a laundry list of changes.
+Generate a pull request title and description focused on **why** the change exists, not what files changed.
 
 ## Usage
 
 ```
-/pr [base-branch] [--fetch]
+/pr [base-branch]
 ```
-
-**Flags**:
-- `--fetch` — Fetch base branch from remote before diffing (default: local-only)
 
 ## Process
 
-### 1. Resolve Base & Diff
+### 1. Resolve Base Branch
 
-**MANDATORY: Resolve base branch before running any git commands.**
+Follow this priority order — stop at the first match:
 
-Follow this priority order and STOP at the first match:
+#### Priority 1 — Explicit arg
 
-#### Priority 1 — Command arg (SKIP SELECTION)
-If user provided a base (e.g. `/pr develop` or `/pr on main`), **use it directly and skip branch selection entirely**. 
+If user provided a base (e.g. `/pr main`, `/pr develop`), use it directly. Skip all detection.
 
-**CRITICAL**: When a branch argument is provided, do NOT run `AskUserQuestion` for branch selection. Proceed directly to diff validation.
+#### Priority 2 — Auto-detect from upstream tracking
 
-Examples:
-- `/pr main` → Use `main` as base, skip selection
-- `/pr origin/develop` → Use `origin/develop` as base, skip selection  
-- `/pr on feature-branch` → Use `feature-branch` as base, skip selection
+If no arg, infer the base from the current branch's upstream:
 
-#### Priority 2 — Interactive branch selection (ONLY when no arg provided)
+```bash
+git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null
+```
 
-Run this command to get recent branches with upstream tracking info:
+**If the upstream resolves to a well-known base** (`origin/main`, `origin/master`, `origin/develop`), use it directly without asking. This covers >90% of cases.
+
+**Rules:**
+- Use the remote tracking ref as-is (e.g. `origin/main`), not the local branch — it reflects the actual merge target.
+- Do NOT fetch — use the locally cached tracking ref. Fetching can disrupt fork structure and produce incorrect diffs.
+
+#### Priority 3 — Interactive selection (ambiguous cases only)
+
+Only ask the user when:
+- The branch has **no upstream** configured, OR
+- The upstream is a **non-standard branch** (not `origin/main`, `origin/master`, `origin/develop`) — this suggests a stacked/dependent branch where the base is ambiguous
+
+When asking, run:
 ```bash
 git branch -vv --sort=-committerdate | head -10
 ```
 
-This shows each branch with its upstream (e.g. `[origin/main: ahead 2]`), helping identify the right base.
+Present candidates with their upstream tracking status. Once user selects, proceed immediately.
 
-**When building the candidate list:**
-
-1. **Show local and remote tracking branches separately** — always include both local and remote as distinct options:
-   - `main` (local) — diff against local HEAD
-   - `origin/main` (remote tracking) — diff against remote HEAD (must have fetched locally first)
-
-2. **Include common bases** — always add `main` and `develop` (and their `origin/` tracking refs) if they exist.
-
-3. **Show upstream tracking status** in every option's description:
-   - Local: `main (local) · behind 1`
-   - Remote: `origin/main · tracks origin/main`
-   - No upstream: `feature-branch · no upstream`
-
-4. **Deduplicate by commit hash** — if multiple branches point to the same commit, group them as one option with a note listing the aliases.
-
-5. **IMPORTANT** — When user selects a remote tracking ref like `origin/main`, keep it as-is and diff against that ref directly. DO NOT strip the `origin/` prefix — the user explicitly chose the remote ref.
-
-Then use `AskUserQuestion` to present the candidates. Once user selects, proceed immediately — no confidence analysis needed.
-
----
-
-**After base is confirmed**, validate then diff:
+### 2. Get the Diff
 
 ```bash
-# local ref: git rev-parse refs/heads/<base>
-# remote ref: git rev-parse <base>  (must be fetched first)
 git log <base>..HEAD --oneline
 git diff <base>..HEAD --stat
 git diff <base>..HEAD
 ```
 
-### 2. Find the Purpose (Why > What > How)
+### 3. Understand the Purpose
 
-**CRITICAL**: Before writing anything, answer these three questions:
+Before writing anything, answer:
+- **Why?** What was broken, missing, or painful?
+- **So what?** What behavior changes for users/developers?
+- **Now what?** What can they do now that they couldn't before?
 
-1. **Why?** What problem motivated this change?
-   - What was broken, missing, or painful?
-   - What triggered the work?
+Describe the outcome, not the implementation. If you catch yourself writing "Added X class" or "Modified Y file", stop and reframe around the user/developer impact.
 
-2. **So what?** Who benefits and how?
-   - What is the user-facing impact?
-   - What behavior actually changes?
+### 4. Title
 
-3. **Now what?** What's the outcome?
-   - Don't list functions/files
-   - Describe the result, not the activity
+Format: `<prefix>(<scope>): <outcome>`
 
-**Example transformation:**
-| Too Technical                                                                                                                             | Purpose-Driven                                                                                                                      |
-| ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| "Added ClaudeClient type, moved transport logic to createSessionBoundTransport(), added AnthropicClientInterface, removed claude_util.go" | "OAuth provider support was duplicated across clients. Unified transport setup and extracted ClaudeClient for consistent behavior." |
+Prefixes: `feat` `bugfix` `refactor` `perf` `doc` `test` `chore`
 
-Only after answering these questions, proceed to understand the technical details.
+Rules: lowercase, under 72 chars, describe outcome not action.
 
-### 3. Write Title
+### 5. Description
 
-- Format: `[prefix](scope): [description]`
-- Prefixes: `bugfix`, `feat`, `refactor`, `doc`, `build`, `test`, `chore`
-- Scope: module/area affected (e.g., `server`, `protocol`, `bot`, `frontend`). Use comma for multiple: `bot,smart_guide`
-- Lowercase, under 72 chars
-- Describe the **outcome**, not the action
+Organize the description by **business or functional themes**, not by generic
+importance buckets such as `Major` / `Minor`. Those labels hide the actual
+shape of the change and force readers to infer what each bullet is about.
 
-| Bad                        | Good                                                   |
-| -------------------------- | ------------------------------------------------------ |
-| `feat: add login function` | `feat(auth): implement user authentication`            |
-| `refactor: rename files`   | `refactor(command): unify provider command interface`  |
-| `fix: bug in auth`         | `bugfix(server): resolve authentication timeout issue` |
+Each key change must use this form:
 
-### 4. Write Description
-
-**Structure:**
 ```markdown
-## Summary
-[1-2 sentences: Why did we do this? What problem did it solve?]
-
-### Major
-[Core changes that define this PR - the main purpose and impact]
-
-### Minor
-[Supporting changes - refactoring, cleanup, internal improvements]
+- **Theme**: Describe the problem solved, the behavior change, and why it matters.
 ```
 
-**Major** = The "main thing" this PR accomplishes — what problem, what impact, what changed for users.
+Choose concrete themes from the diff, such as a user workflow, lifecycle,
+compatibility boundary, migration, safety guarantee, or developer experience.
+Do not use file names, class names, or vague labels such as "Improvements",
+"Miscellaneous", "Major", or "Minor" as themes.
 
-**Minor** = Supporting work — cleanup, refactoring, non-user-facing changes.
+Use `Key Changes` for everything that contributes directly to the PR's purpose.
+If the diff also contains genuinely incidental work completed along the way,
+append an optional `Minor` section after `Key Changes`. Omit the section when
+there are no incidental changes; never invent or demote content just to fill it.
 
-**Before outputting, verify:**
-- Does the Summary answer "Why did we do this?"
-- Does Major describe outcomes, not functions/files?
-- Would a non-technical stakeholder understand the impact?
+Treat the structure below as a starting point, not a rigid contract. Adapt the
+headings and order to the change so the description answers the reviewer's real
+questions with the least noise. Never output an empty or irrelevant section.
 
-### 5. Output Behavior
+```markdown
+## Summary
+[1–2 sentences: what problem existed and what this solves]
 
-Output the PR content as **separate plain blocks** — do NOT inline the body into a shell command. This avoids line-wrap issues and makes the output easy to copy.
+## Key Changes
 
-**Format:**
+- **[Business or functional theme]**: [What behavior changes and why it matters]
+- **[Business or functional theme]**: [What users or developers can now do]
+- **[Compatibility, migration, or safety theme]**: [Technical guarantee that supports the outcome]
+```
+
+Only when incidental changes exist, append:
+
+```markdown
+## Minor
+
+- **[Supporting theme]**: [Small cleanup, refactor, documentation, or test change made along the way]
+```
+
+`Minor` must not contain core behavior, required migration work, compatibility
+guarantees, or safety protections. Those belong under their functional themes
+in `Key Changes`, even when their implementation is small.
+
+If the change leaves follow-up work, known limitations, rollout concerns, or
+anything reviewers and operators must pay special attention to, add a `Notes`
+section. State the consequence and next action when known; do not hide these
+items inside `Minor`.
+
+```markdown
+## Notes
+
+- **[Known limitation, follow-up, or attention point]**: [Impact, current status, and next action]
+```
+
+Add other sections when they make the PR easier to evaluate, such as
+`Migration`, `Compatibility`, `Testing`, `Rollout`, `Risks`, or `Screenshots`.
+Use the clearest domain-specific heading instead of forcing distinct concerns
+into `Key Changes`, `Minor`, or `Notes`. The examples are guidance, not an
+exhaustive list or required template.
+
+Before outputting, verify:
+
+- The summary explains the motivating problem and resolved outcome.
+- Every bullet starts with a specific bold theme followed by a colon.
+- Themes describe business capabilities or functional boundaries, not priority.
+- Related changes are grouped under one theme instead of scattered across bullets.
+- `Minor` appears only for genuinely incidental work and is omitted otherwise.
+- No core outcome, migration, compatibility, or safety guarantee is placed in `Minor`.
+- Outstanding work and special attention points are explicit in `Notes` when present.
+- Additional sections are included only when they help reviewers evaluate the change.
+- The final structure follows the change rather than mechanically copying the example.
+- Technical details appear only when they explain behavior, compatibility, migration, or safety.
+- A reviewer can scan only the bold themes and understand the shape of the PR.
+
+### 6. Output
 
 ```
 ## Pull Request Ready
 
-**Base**: main → **HEAD**: feat/foo  |  3 commits
+**Base**: <base> → **HEAD**: <branch>  |  N commits
 
 **Title**
-feat(auth): implement user authentication
+<title>
 
 **Description**
-## Summary
-...
-
-### Major
-- ...
-
-### Minor
-- ...
+<description block>
 
 ---
 
 **Create PR:**
-- GitHub web: https://github.com/[owner]/[repo]/compare/[base]...[head]
-- CLI: `gh pr create --title "[full title here]" --base [base]`  (use Description block above as body)
+- GitHub: https://github.com/<owner>/<repo>/compare/<base>...<head>
+- CLI: `gh pr create --title "<title>" --base <base>`  (paste Description above as body)
 ```
 
-**Key rules:**
-- Title on its own line (no inline shell quoting)
-- Description as a clean unescaped block — user copies it directly
-- **GitHub compare URL must be complete and clickable** — resolve `[owner]`, `[repo]`, `[base]`, `[head]` from `git remote get-url origin` and actual branch names
-- **CLI command must be complete** — include the full `--title` value; body is separate (user pastes from Description block)
-- Never embed the full body inline in the shell command — keep body as its own copy block
-
-## Example
-
-**Title:** `refactor(command): unified provider command with interactive mode`
-
-**Description:**
-```markdown
-## Summary
-Provider management was scattered across 4 separate commands with inconsistent UX. Consolidated into a single interactive command.
-
-### Major
-- Single command handles all provider operations (add, list, get, update, delete)
-- Interactive mode guides users through available actions
-- UUID-based lookups prevent errors from duplicate provider names
-
-### Minor
-- Renamed add.go to provider_add.go for consistency
-- Removed unused shell command code
-```
+Resolve `<owner>`, `<repo>`, `<head>` from `git remote get-url origin`. Never embed the full body in the CLI command.
 
 ## Related Skills
 
-- `/commit` - Commits must exist before creating PR
-- `/sdlc cr` - Code review before PR review
-- `/sdlc test` - Tests that must pass
+- `/commit` — Commits must exist before creating PR
+- `/cr` — Code review before PR review
 
 ---
 
-**Version**: 1.13.0 | **Updated**: 2026-06-17
+**Version**: 1.4.0 | **Updated**: 2026-07-15
