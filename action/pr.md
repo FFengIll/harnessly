@@ -1,12 +1,37 @@
 # /pr
 
-Generate a pull request title and description focused on **why** the change exists, not what files changed.
+Prepare a pull request handoff for **human submission**: a title, description,
+and clickable GitHub link. Focus the content on **why** the change exists, not
+what files changed.
 
 ## Usage
 
 ```
 /pr [base-branch]
 ```
+
+## Execution Boundary
+
+This skill prepares PR materials for the user to submit manually. Mentioning
+"PR" means writing the PR title and content and providing a clickable submission
+link — it does not authorize publishing automation.
+
+This skill may perform read-only inspection of local Git history, diffs, branch
+tracking, and remote URLs.
+
+**NEVER perform remote writes:**
+
+- Do not push a branch.
+- Do not run `gh pr create`.
+- Do not call an API or connector to create or update a pull request.
+- Do not submit, publish, merge, close, or otherwise mutate a pull request.
+- Do not infer permission for any of these actions from phrases such as
+  "write a PR", "prepare a PR", or "PR this change".
+
+If the branch is not available on the remote, still provide the intended GitHub
+compare/create link and clearly state that the user must publish the branch
+before the link can create a PR. Remote publishing belongs to a separate,
+explicitly invoked publishing workflow.
 
 ## Process
 
@@ -76,11 +101,42 @@ Organize the description by **business or functional themes**, not by generic
 importance buckets such as `Major` / `Minor`. Those labels hide the actual
 shape of the change and force readers to infer what each bullet is about.
 
-Each key change must use this form:
+Be **reasonably concise, not exhaustive**. Say what changed and why it
+matters; do not catalogue every nuance the diff touches. The same point
+reworded across the title, Summary, a Key Changes bullet, and Notes is
+padding, not detail. Rules:
+
+- **One fact, one place.** If the title states it, the Summary must not
+  re-explain it — only add what the title cannot carry (the *why*).
+- **Each bullet earns its line.** Before writing a bullet, ask whether the point
+  is already made elsewhere; if so, cut it. Two bullets must not say the same
+  thing at different altitudes.
+- **Summary ≠ title reworded.** It states the motivating problem and the
+  resolved outcome in 1–2 sentences — not a paraphrase of the title.
+- **Notes ≠ Key Changes echoed.** Notes hold only what a reviewer must act on
+  or watch out for. Do not restate that a change is safe when a Key Changes
+  bullet already implies it.
+- **Pick the shorter phrasing** when two carry equal information.
+
+Each key change is one bullet. **Reasonably concise, not exhaustive.**
 
 ```markdown
-- **Theme**: Describe the problem solved, the behavior change, and why it matters.
+- **Theme**: The behavior change, in one clause.
 ```
+
+Write one clause per bullet. Add a second clause only when it changes the
+meaning (a *why*, a *so-what*, or a *before/after*); never stack all three.
+If a bullet needs a third clause to make sense, split it into two bullets.
+Prefer the phrasing that carries the same information in fewer words.
+
+Before-and-after, same change:
+
+- Verbose: `- **Tool-call ID fidelity**: Responses→Anthropic now emits the
+  upstream call_id as the tool-use id so that multi-turn tool calls round-trip
+  the call identifier clients send rather than the synthetic item id, which
+  fixes broken tool-result correlation on the Responses→Anthropic path.`
+- Concise: `- **Tool-call ID fidelity**: Responses→Anthropic tool-use now
+  carries the upstream \`call_id\`, fixing multi-turn tool-result correlation.`
 
 Choose concrete themes from the diff, such as a user workflow, lifecycle,
 compatibility boundary, migration, safety guarantee, or developer experience.
@@ -136,24 +192,36 @@ Use the clearest domain-specific heading instead of forcing distinct concerns
 into `Key Changes`, `Minor`, or `Notes`. The examples are guidance, not an
 exhaustive list or required template.
 
-Before outputting, verify:
+Before outputting, run the brevity gate:
 
-- The summary explains the motivating problem and resolved outcome.
-- Every bullet starts with a specific bold theme followed by a colon.
-- Themes describe business capabilities or functional boundaries, not priority.
-- Related changes are grouped under one theme instead of scattered across bullets.
-- `Minor` appears only for genuinely incidental work and is omitted otherwise.
-- No core outcome, migration, compatibility, or safety guarantee is placed in `Minor`.
-- Outstanding work and special attention points are explicit in `Notes` when present.
-- Additional sections are included only when they help reviewers evaluate the change.
-- The final structure follows the change rather than mechanically copying the example.
-- Technical details appear only when they explain behavior, compatibility, migration, or safety.
-- A reviewer can scan only the bold themes and understand the shape of the PR.
+- **No restatement.** Nothing appears in more than one place (title / Summary /
+  a bullet / Notes). If a point is already made, cut the duplicate.
+- **No padding.** Each bullet earns its line with new information — not a
+  re-explanation, not a "this is safe" reassurance, not a hedge.
+- **Scannable.** A reviewer reading only the bold themes understands the shape
+  of the PR; the clauses after each colon add the essential *what*/*why* only.
+- **Right structure.** Themes are functional boundaries, not priority;
+  incidental work is under `Minor` only; outstanding work is in `Notes`.
 
 ### 6. Output
 
-```
-## Pull Request Ready
+Emit the handoff as a **single copyable Markdown block** so the user can copy
+title + description in one click. Open the block with a 3-backtick ```` ```markdown ````
+fence and close it with 3 backticks. Keep the block focused on what the user
+pastes into the PR form: title and description only.
+
+Place the GitHub submission link **outside and after** the block, as a normal
+clickable Markdown link. Keeping it outside the fenced block ensures it stays
+clickable (a URL inside a code block is not a link).
+
+Below is the exact shape to emit. In this instruction file the template is
+wrapped in a 4-backtick fence (``````) so the inner 3-backtick fence renders
+as literal guidance; the handoff you actually emit to the user must use a
+3-backtick ` ```markdown ` fence.
+
+````
+```markdown
+## Pull Request Handoff
 
 **Base**: <base> → **HEAD**: <branch>  |  N commits
 
@@ -162,21 +230,28 @@ Before outputting, verify:
 
 **Description**
 <description block>
+```
+````
 
 ---
 
-**Create PR:**
-- GitHub: https://github.com/<owner>/<repo>/compare/<base>...<head>
-- CLI: `gh pr create --title "<title>" --base <base>`  (paste Description above as body)
-```
+**Submit manually:**
+- GitHub: https://github.com/<owner>/<repo>/compare/<base>...<head>?expand=1
 
-Resolve `<owner>`, `<repo>`, `<head>` from `git remote get-url origin`. Never embed the full body in the CLI command.
+Resolve `<owner>`, `<repo>`, and `<head>` from `git remote get-url origin`.
+Return the GitHub URL as a clickable Markdown link. Do not output commands that
+create, update, or publish a PR.
+
+If the branch is not yet on the remote, still print the link and note that the
+user must publish the branch before the link can create a PR.
 
 ## Related Skills
 
 - `/commit` — Commits must exist before creating PR
 - `/cr` — Code review before PR review
+- Publishing workflow — Must be invoked separately and explicitly when the user
+  wants remote mutation
 
 ---
 
-**Version**: 1.4.0 | **Updated**: 2026-07-15
+**Version**: 1.8.0 | **Updated**: 2026-08-06

@@ -1,306 +1,149 @@
 # /commit
 
-/commit creates a git commit with proper file selection and message formatting. Works standalone or within SDLC workflow.
-
-**Purpose**: Commit changes with proper file selection, separation of concerns, and conventional commit messages
+Create one or more focused Git commits for the active task. Classify changes
+before staging so related work stays together and unrelated work stays untouched.
 
 ## Usage
 
+```text
+/commit [optional message]
+/sdlc commit [optional message]
 ```
-/commit [message]
-```
 
-**Arguments:**
-- `message`: Commit message (optional - auto-generates if not provided)
+An explicit message applies only when the work forms one coherent group.
+Generate separate messages when multiple commits are needed.
 
-**Examples:**
-- `/commit` - Auto-generate commit message from changes
-- `/commit "feat: add user authentication"` - Use custom message
+## Contract
 
-**Standalone Use:**
+Treat `commit` as a request to commit the active task, not the whole working
+tree.
+
+- Inspect staged, unstaged, and untracked changes before staging.
+- Group by purpose, issue, dependency, and independent review/revert boundaries.
+- Keep code with directly required tests, schema/codegen, and documentation.
+- Split changes that can be safely reviewed, reverted, or shipped independently.
+- Leave unrelated changes untouched and report them at the end.
+- Preserve pre-existing staged changes. If the index mixes unrelated work, stop
+  before changing it and explain the conflict.
+- Never use `git add .`, `git add -A`, `git commit -a`, or broad globs.
+- Never commit secrets, credentials, environment files, build artifacts, editor
+  state, logs, or temporary files.
+
+## Workflow
+
+### 1. Inventory
+
 ```bash
-# Use anytime without SDLC workflow
-/commit
-/commit "fix: resolve login timeout"
+git status --short
+git diff
+git diff --cached
 ```
 
-**SDLC Workflow Use:**
+Identify:
+
+- Changes belonging to the active task.
+- Changes outside the task or predating it.
+- Existing staged changes.
+- Files containing hunks from different purposes.
+
+### 2. Classify
+
+Create a plan before staging:
+
+```text
+Commit 1 — <purpose>
+  type: <feat|bugfix|refactor|test|doc|chore|...>
+  files/hunks: <exact scope>
+  verification: <relevant checks>
+
+Commit 2 — <purpose>
+  ...
+
+Leave uncommitted:
+  <path>: <reason>
+```
+
+Use one commit when all changes implement one atomic outcome. Use multiple
+commits when groups are independently meaningful. Relatedness matters more than
+file type: do not automatically split tests or required docs from their code,
+and do not combine unrelated files merely because they changed together.
+
+If one file contains unrelated hunks, stage only the relevant patch. If safe
+separation is impossible, ask for direction instead of mixing purposes.
+
+### 3. Commit Each Group
+
+Process one group at a time:
+
 ```bash
-# Part of SDLC workflow - runs pre-commit checks
-/sdlc commit
-/sdlc commit "feat: add oauth"
+git add <exact-related-paths>
+git diff --cached --check
+git diff --cached
+git commit -m "<type>: <focused subject>"
 ```
 
-## File Selection Principles
+Before each commit:
 
-### 1. Only Commit Related Files
-- Commit files that are logically related to each other
-- Each commit should have a single, coherent purpose
-- Group files that implement the same feature/fix together
+- Confirm every staged path and hunk belongs to the group.
+- Run checks proportionate to that group's risk.
+- Use a message describing only that outcome.
 
-### 2. Never Commit
+After each commit, inspect `git status --short` again before staging the next
+group.
 
-**Secrets & Credentials:**
-- `.env`, `.env.local`, `.env.production`
-- `credentials.json`, `.pem`, `.key`, `.cert`
-- `secrets/`, `private/`
+### 4. Audit
 
-**IDE/Editor Files:**
-- `.idea/`, `.vscode/`, `*.swp`, `*.swo`
-- `.DS_Store`, `Thumbs.db`
-
-**Build Artifacts:**
-- `node_modules/`, `dist/`, `build/`, `*.lockb`
-- `*.pyc`, `__pycache__/`, `.pytest_cache/`
-
-**Test/Temp Files:**
-- Files with `test-` prefix (unless explicitly requested)
-- `*.log`, `npm-debug.log`, `yarn-error.log`
-- `tmp/`, `temp/`, `.tmp/`
-
-### 3. Separate Different Changes
-- Different features → separate commits
-- Bug fixes vs new features → separate commits
-- Refactoring vs functional changes → separate commits
-- Docs vs code → separate commits (unless doc change directly relates to code change)
-- Different modules/packages → separate commits if logically independent
-
-## Commit Message Format
-
-Follow conventional commits format:
-
-```
-<type>: <subject>
-```
-
-**Types:**
-- `bugfix:` - Bug fixes
-- `feat:` - New features
-- `command:` - Command-related changes
-- `chore:` - Chores/maintenance
-- `mv:` - File/directory moves
-- `doc:` - Documentation changes
-- `perf:` - Performance improvements
-- `refactor:` - Code refactoring
-- `test:` - Test additions or changes
-- `ci:` - CI/CD changes
-
-**Examples:**
-```
-feat: add user authentication
-bugfix: fix token validation edge cases
-refactor: extract validation logic to service
-doc: update README with setup instructions
-```
-
-## Commit Process
-
-### 1. Check Status
 ```bash
-git status        # See all untracked and modified files
-git diff          # See actual changes
+git status --short
+git log -n <created-count> --oneline
 ```
 
-### 2. Group Related Changes
-- Identify logical groups among changed files
-- Plan multiple commits if changes fall into distinct categories
+Report:
 
-### 3. Stage Files Selectively
-```bash
-git add <specific-files>    # NOT git add . or git add -A
-```
-Stage only the files for the current commit. Double-check: do these files all relate to the same change?
+- Commits created, in order.
+- Verification performed for each group.
+- Remaining dirty files and why they were excluded.
 
-### 4. Write Commit Message
-- Follow commit message format above
-- Keep it focused on what changed and why
-- Lowercase prefix and description
+## Commit Messages
 
-### 5. Verify and Commit
-```bash
-git status          # Verify staged files
-git diff --staged   # Review changes
-git commit -m "message"
-```
-Repeat for remaining changes if applicable.
+Use:
 
-## Commit Examples
-
-**Scenario 1: Single focused change**
-```
-Changed files: auth.go, auth_test.go, login.html
-All related to login feature
-→ Single commit: "feat: add user login functionality"
+```text
+<type>: <imperative outcome>
 ```
 
-**Scenario 2: Multiple unrelated changes**
-```
-Changed files:
-- user.go, user_test.go (new feature)
-- auth.go (bugfix)
-- README.md (docs)
-- .env.local (should be ignored!)
+Common types: `feat`, `bugfix`, `refactor`, `perf`, `test`, `doc`, `chore`,
+`ci`, `command`, `mv`.
 
-→ Commit 1: "bugfix: fix token validation in auth"
-→ Commit 2: "feat: add user profile management"
-→ Commit 3: "doc: update README with new features"
-→ Ignore .env.local
-```
+Keep the subject focused and preferably under 50 characters. Explain why in a
+body only when the subject and diff do not make the reason clear.
 
-**Scenario 3: With suspicious files**
-```
-Changed files:
-- api.go (feature)
-- .env (NEVER COMMIT)
-- test-api.sh (test file, skip unless asked)
+## SDLC Checks
 
-→ Commit: "feat: add new API endpoints"
-→ Warn about .env, skip test-api.sh
-```
+When invoked through `/sdlc commit`, use the applicable outputs from earlier
+workflow stages:
 
-## SDLC Integration
+- Tests and validation for changed behavior.
+- Security results for sensitive changes.
+- Review approval when the workflow requires it.
+- Spec or generated artifacts only when directly relevant.
 
-When used in SDLC workflow (`/sdlc commit`), additional checks apply:
+Do not claim a check passed when it was not run. If a check fails for a known
+unrelated reason, report that precisely and commit only when the user request
+and repository policy still permit it.
 
-### Pre-commit Checklist
+## Failure Boundaries
 
-**Code Quality:**
-- [ ] All tests passing (`/sdlc test`)
-- [ ] Verification complete (`/sdlc verify`)
-- [ ] Security scan passed (`/sdlc secure`)
-- [ ] Code review approved (`/sdlc cr`)
+- On a commit-hook failure, fix the cause and create a new commit attempt; do
+  not amend a commit that was never created.
+- Do not unstage or rewrite user-owned index state without approval.
+- Do not amend, squash, rebase, push, or create a PR unless separately requested.
 
-**Documentation:**
-- [ ] Spec document exists (if applicable)
-- [ ] Test reports saved
-- [ ] Verification report saved
-- [ ] Security report saved
-- [ ] Code review saved
+## Next Step
 
-**Files:**
-- [ ] No unintended changes
-- [ ] No sensitive data committed
-- [ ] No debug console.logs
-- [ ] No TODO comments without issues
+`/sdlc pr` prepares a title, description, and clickable link for human
+submission. It does not publish the branch or create the PR.
 
-### Enhanced Commit Output (SDLC Mode)
+---
 
-```
-━━━ Pre-commit Checklist ━━━
-
-Code Quality:
-✓ All tests passing
-✓ Validation complete (100% requirements met)
-✓ Security scan passed (no critical issues)
-✓ Code review approved
-
-Documentation:
-✓ Spec document: .sdlc/docs/auth-user-login-20240319.spec.md
-✓ Test report: .sdlc/docs/auth-user-login-20240319.test.md
-✓ Validation: .sdlc/docs/auth-user-login-20240319.validate.md
-✓ Security: .sdlc/docs/auth-user-login-20240319.secure.md
-✓ Code review: .sdlc/docs/auth-user-login-20240319.cr.md
-
-Files:
-✓ No unintended changes
-✓ No sensitive data committed
-✓ No debug code remaining
-
-━━━ Changes to Commit ━━━
-
-Files: 6 changed, 0 deleted
-  src/auth/register.ts       | +45 new lines
-  src/auth/login.ts          | +38 new lines
-  src/auth/service.ts        | +89 new lines
-  src/auth/middleware.ts     | +23 new lines
-  src/types/auth.ts          | +15 new lines
-  tests/unit/auth.test.ts    | +67 new lines
-
-━━━ Commit Message ━━━
-
-feat: add JWT-based authentication
-
-Implement JWT-based authentication system with:
-- User registration endpoint (POST /api/auth/register)
-- User login endpoint (POST /api/auth/login)
-- Token refresh mechanism (POST /api/auth/refresh)
-
-Features:
-- bcrypt password hashing (10 rounds)
-- JWT tokens (15min access, 7d refresh)
-- Email verification
-- Rate limiting
-
-Spec: .sdlc/docs/auth-user-login-20240319.spec.md
-Tests: 45/45 passing
-Coverage: 87%
-
-Closes #123
-
-━━━ Commit Action ━━━
-Ready to commit. Use 'git commit' to finalize.
-```
-
-## Best Practices
-
-### Commit Granularity
-- **One feature per commit**: Keep commits focused
-- **Atomic changes**: Each commit should be self-contained
-- **Logical grouping**: Group related files together
-- **Small commits**: Easier to review and revert if needed
-- **Multiple commits**: Better than one large mixed commit
-
-### Commit Message Tips
-- **Use imperative mood**: "Add feature" not "Added feature"
-- **Limit subject line**: 50 characters or less
-- **Reference issues**: Link to related issue/PR numbers
-- **Explain why**: Describe the reason for the change
-- **Lowercase**: Use lowercase for type and description
-
-### What to Include
-- Changed source files
-- Test files
-- Documentation updates
-- Configuration changes
-
-### What to Exclude
-- Generated files (lock files, build artifacts)
-- IDE settings (.vscode, .idea)
-- Environment files (.env.local)
-- Debug code
-- Sensitive credentials
-
-## Safety Protocols
-
-### Git Safety
-- **ALWAYS stage specific files by name**, not `git add .` or `git add -A`
-- **NEVER commit secrets**: .env, credentials.json, .pem, .key files
-- **ALWAYS review** what you're staging before committing
-- **When in doubt**, ask: "Do these changes belong together?"
-
-### Hook Failures
-- After pre-commit hook failure, create NEW commit (don't amend)
-- Fix the issue, re-stage, and commit again
-
-## Completion Conditions
-
-- [ ] Only related files staged
-- [ ] No secrets or sensitive data committed
-- [ ] Commit message follows format
-- [ ] Commit created successfully
-- [ ] (SDLC only) All pre-commit checks passed
-
-## State Integration
-
-- **Updates**: `sdlc.phase` = `commit`
-- **Creates**: Git commit
-- **Creates**: Commit log in `.sdlc/docs/category-feature-date.commit.md` (SDLC only)
-- **Requires**: (SDLC only) `cr` phase completed with approval
-- **Next**: (SDLC only) Proceed to `/sdlc pr` phase
-
-## Related Skills
-
-- `/git` - Low-level git operations (status, diff, branch)
-- `/sdlc cr` - (SDLC only) Prerequisite: code review must be approved
-- `/sdlc pr` - (SDLC only) Next phase: create pull request
-- `/sdlc test` - (SDLC only) Tests that must pass before committing
+**Version**: 1.2.0 | **Updated**: 2026-07-23
