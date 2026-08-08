@@ -1,27 +1,19 @@
 # /pr
 
-Prepare a pull request handoff for **human submission**: a title, a description,
-and a clickable GitHub link. Focus on **why** the change exists, not what files
-changed.
+Prepare a pull request **handoff**: a title, a description, and a clickable
+GitHub compare link for the user to submit manually. Focus on **why** the
+change exists, not what files changed.
+
+This skill is **read-only** (local git history, diffs, branch tracking, remote
+URLs). It never performs remote writes — no push, no `gh pr create`, no PR
+mutation via any API — regardless of phrasing like "write a PR" or "PR this
+change". Remote publishing is a separate, explicitly invoked workflow.
 
 ## Usage
 
 ```
 /pr [base-branch]
 ```
-
-## Execution Boundary
-
-- **Read-only**: may inspect local git history, diffs, branch tracking, and
-  remote URLs.
-- **NEVER perform remote writes**: no `git push`, no `gh pr create`, no API or
-  connector call that creates, updates, merges, closes, or otherwise mutates a
-  PR.
-- Phrases like "write a PR", "prepare a PR", "PR this change" do **not**
-  authorize publishing. Remote publishing is a separate, explicitly invoked
-  workflow.
-- If the branch is not on the remote, still emit the compare link and state
-  that the user must publish the branch first.
 
 ## Process
 
@@ -151,6 +143,8 @@ Brevity gate — check before output:
   link (a URL inside a code block is not clickable).
 - Resolve `<owner>`, `<repo>`, `<head>` from `git remote get-url origin`. Do
   not output commands that create, update, or publish a PR.
+- If the branch is not on the remote, still emit the compare link and note
+  that the user must publish the branch first.
 
 Exact shape to emit (wrapped here in a 4-backtick fence so the inner fence
 renders as literal guidance):
@@ -176,4 +170,4 @@ renders as literal guidance):
 
 ---
 
-**Version**: 2.1.0 | **Updated**: 2026-08-07
+**Version**: 2.2.0 | **Updated**: 2026-08-08
