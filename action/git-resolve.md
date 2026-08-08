@@ -602,17 +602,6 @@ git add <submodule>
 - [ ] Changes pushed to remote (if applicable)
 - [ ] Team notified if significant conflicts occurred
 
-## Related Skills
-
-- `/git` - General git operations (status, branch, merge)
-- `/commit` - Commit changes after resolving conflicts
-- `/pr` - Pull request operations after resolving conflicts
-
-## Dependencies
-
-- **git**: Git must be installed and available
-- **editor**: Text editor for manual resolution (optional)
-
 ## Version
 
 **Created**: 2026-03-12

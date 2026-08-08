@@ -162,14 +162,6 @@ Analyzed 3 changed files — code is clean and follows project conventions.
 /sdlc pr
 ```
 
-## Related Skills
-
-- **refactor workflow** - For structural/architectural changes (not simplification)
-- **cr** - Code review finds issues; simplify fixes them
-- **coding** - Where code is first written
-- **test** - Verification after simplification
-- **minor workflow** - For small direct changes
-
 ## Examples
 
 ### Example 1: Simplify After Feature Work

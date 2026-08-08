@@ -293,15 +293,6 @@ understand → cr → spec → coding → test → verify → cr → commit → 
 /sdlc spec "Add OAuth"       # Reads auth-arch.md for context
 ```
 
-## Related Skills
-
-- **/research** - External technology and solution research
-- **/spec** - Uses architecture cache to write specifications
-- **/debug** - Problem diagnosis (after understanding context)
-- **/cr** - Code review and quality assessment
-- **/pencil** - Create diagrams to visualize architecture
-- **/doc** - Generate documentation from understanding
-
 ## Tips
 
 - Use `understand` first when working with unfamiliar code

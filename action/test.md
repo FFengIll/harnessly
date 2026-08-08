@@ -244,8 +244,3 @@ tests/
 - **Requires**: `coding` phase completed
 - **Next**: Proceed to `/sdlc validate` phase
 
-## Related Skills
-
-- `/sdlc coding` - Implementation phase that creates code to test
-- `/sdlc verify` - Next phase to verify against spec
-- `/sdlc debug` - Used if tests fail and debugging is needed

@@ -471,12 +471,6 @@ npm update
 - **Requires**: `validate` phase completed (implementation validated)
 - **Next**: Proceed to deployment or back to coding for fixes
 
-## Related Skills
-
-- `/sdlc verify` - Prerequisite: implementation must be verified first
-- `/sdlc coding` - Return here if security fixes are needed
-- `/sdlc test` - May need to re-test after security fixes
-
 ## Security Checklist
 
 ### Code Security

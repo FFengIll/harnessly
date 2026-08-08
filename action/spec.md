@@ -156,14 +156,6 @@ Include:
 
 The spec phase translates research findings and architecture understanding into a concrete implementation plan.
 
-## Related Skills
-
-- **understand.md** - Generates architecture cache
-- **doc.md** - Create and save specification documents
-- **pencil.md** - Create diagrams for specifications
-- **research.md** - Previous phase: provides foundation
-- **coding.md** - Next phase: implements based on spec
-
 ---
 
 **Version**: 1.2.0 | **Updated**: 2026-04-12

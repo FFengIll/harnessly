@@ -394,12 +394,6 @@ Save validation reports to `.sdlc/docs/category-feature-date.validate.md`
 - `login-goal-20240319.validate.md`
 - `payment-flow-20240319.validate.md`
 
-## Related Skills
-
-- **harness.md** - Create validation harnesses
-- **test.md** - Run automated tests
-- **spec.md** - Implementation specifications
-
 ## Example Usage Scenarios
 
 ### Scenario 1: Validate Critical Auth Flow

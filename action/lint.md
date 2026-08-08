@@ -225,13 +225,6 @@ Analyzed 3 changed files across 2 languages — clean.
 - `run eslint`, `run golangci-lint`, `run ruff`
 - `check code style`
 
-## Related Skills
-
-- **simplify** — Reduces complexity and improves readability (not rule-based)
-- **cr** — Full code review including security, performance, architecture
-- **test** — Verification after lint fixes
-- **coding** — Where code is first written
-
 ---
 
 **Version**: 1.0.0 | **Updated**: 2026-04-11

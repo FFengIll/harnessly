@@ -178,14 +178,3 @@ Deep dive into a specific concern.
 - **Creates**: Code review report in `.sdlc/docs/category-feature-date.cr.md`
 - **No state updates**: Can be run anytime
 
-## Related Skills
-
-**Workflow Phase**:
-- `/sdlc secure` - Prerequisite: security checks completed
-- `/sdlc coding` - The code being reviewed
-- `/sdlc commit` - Next phase after approval
-- `/sdlc test` - Tests that should pass
-
-**Standalone Use**:
-- `/sdlc cr src/auth for security` - Security-focused review
-- `/sdlc cr changes vs main for performance` - Performance retro review

@@ -150,12 +150,6 @@ This skill is typically invoked as the first phase in the SDLC workflow:
 
 The research phase helps ensure that specifications are grounded in thorough analysis and that the best approach is chosen before committing to implementation.
 
-## Related Skills
-
-- **doc.md** - Used to document research findings
-- **pencil.md** - May be used for creating diagrams in research documentation
-- **spec.md** - Next phase: creates specification based on research
-
 ## Best Practices
 
 - Be specific in your research topic for better results

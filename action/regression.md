@@ -470,14 +470,6 @@ npm run e2e
 - **Integration**: Use after `/sdlc test` passes
 - **Output**: Merge decision guidance
 
-## Related Skills
-
-- **`action:branch`** - Branch and base detection (use this for consistent branch detection)
-- **`/sdlc cr`** - Code review focuses on code quality
-- **`/sdlc test`** - Test verification
-- **`/sdlc validate`** - Active validation against harness
-- **`/sdlc pr`** - Create PR after comparison passes
-
 ## Key Differences
 
 | Skill | Focus | When to Use |

@@ -295,13 +295,6 @@ Use `understand` to analyze code before creating harness:
 - [ ] Validation checklist is actionable
 - [ ] Harness saved to `.sdlc/harness/` with `.harness.md` suffix
 
-## Related Skills
-
-- **spec.md** - Implementation specification (complements harness)
-- **verify.md** - Verification phase (uses harness as validation harness)
-- **understand.md** - Architecture understanding (feeds into harness)
-- **cr.md** - Code review (can reference harness)
-
 ## Example Output
 
 See `.sdlc/docs/harness/examples/` for full examples:

@@ -174,13 +174,6 @@ renders as literal guidance):
 **Submit manually:**
 - GitHub: https://github.com/<owner>/<repo>/compare/<base>...<head>?expand=1
 
-## Related Skills
-
-- `/commit` — Commits must exist before creating PR
-- `/cr` — Code review before PR review
-- Publishing workflow — Must be invoked separately and explicitly when the user
-  wants remote mutation
-
 ---
 
 **Version**: 2.1.0 | **Updated**: 2026-08-07

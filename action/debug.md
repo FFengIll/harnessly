@@ -301,9 +301,3 @@ bcrypt.compare().
 - **Workflow**: Bug fix workflow entry point
 - **Next**: Proceed to `/sdlc coding` to implement fix
 
-## Related Skills
-
-- `/sdlc coding` - Next phase to implement the fix
-- `/sdlc test` - Verify the fix works
-- `/sdlc verify` - Ensure no regressions
-- `/sdlc commit` - Commit the bug fix
